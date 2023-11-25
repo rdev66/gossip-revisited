@@ -20,9 +20,7 @@ package org.apache.gossip.lock.vote;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Stores the vote candidate details and its votes.
- */
+/** Stores the vote candidate details and its votes. */
 public class VoteCandidate {
 
   private final String candidateNodeId;
@@ -59,13 +57,11 @@ public class VoteCandidate {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof VoteCandidate))
-      return false;
-    if (obj == this)
-      return true;
+    if (!(obj instanceof VoteCandidate)) return false;
+    if (obj == this) return true;
     VoteCandidate other = (VoteCandidate) obj;
-    return this.candidateNodeId.equals(other.candidateNodeId) && this.votingKey
-            .equals(other.votingKey);
+    return this.candidateNodeId.equals(other.candidateNodeId)
+        && this.votingKey.equals(other.votingKey);
   }
 
   @Override

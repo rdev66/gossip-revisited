@@ -18,7 +18,6 @@
 package org.apache.gossip.crdt;
 
 import java.util.Map;
-
 import org.apache.gossip.manager.GossipManager;
 
 public class PNCounter implements CrdtCounter<Long, PNCounter> {

@@ -29,13 +29,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 /** Only use in unit tests! */
-public class UnitTestTransportManager extends AbstractTransportManager { 
-  
+public class UnitTestTransportManager extends AbstractTransportManager {
+
   private static final Map<URI, UnitTestTransportManager> allManagers = new ConcurrentHashMap<>();
-  
+
   private final URI localEndpoint;
   private BlockingQueue<byte[]> buffers = new ArrayBlockingQueue<byte[]>(1000);
-  
+
   public UnitTestTransportManager(GossipManager gossipManager, GossipCore gossipCore) {
     super(gossipManager, gossipCore);
     localEndpoint = gossipManager.getMyself().getUri();

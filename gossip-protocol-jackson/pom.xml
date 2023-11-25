@@ -16,36 +16,36 @@
  	See the License for the specific language governing permissions and
  	limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.gossip</groupId>
-    <artifactId>gossip-parent</artifactId>
+    <parent>
+        <groupId>org.apache.gossip</groupId>
+        <artifactId>gossip-parent</artifactId>
+        <version>0.1.3-incubating-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <name>Gossip Jackson Protocol</name>
+    <artifactId>gossip-protocol-jackson</artifactId>
     <version>0.1.3-incubating-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
 
-  <name>Gossip Jackson Protocol</name>
-  <artifactId>gossip-protocol-jackson</artifactId>
-  <version>0.1.3-incubating-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.gossip</groupId>
+            <artifactId>gossip-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.gossip</groupId>
+            <artifactId>gossip-base</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.gossip</groupId>
-      <artifactId>gossip-base</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.gossip</groupId>
-      <artifactId>gossip-base</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    
-  </dependencies>
+    </dependencies>
 
 </project>

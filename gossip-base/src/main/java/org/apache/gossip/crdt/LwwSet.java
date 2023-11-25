@@ -17,9 +17,6 @@
  */
 package org.apache.gossip.crdt;
 
-import org.apache.gossip.manager.Clock;
-import org.apache.gossip.manager.SystemClock;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +25,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.gossip.manager.Clock;
+import org.apache.gossip.manager.SystemClock;
 
 /*
   Last write wins CrdtSet
@@ -48,6 +47,82 @@ public class LwwSet<ElementType> implements CrdtAddRemoveSet<ElementType, Set<El
   static private Clock clock = new SystemClock();
 
   private final Map<ElementType, Timestamps> struct;
+
+  public LwwSet(){
+    struct = new HashMap<>();
+  }
+
+
+  @SafeVarargs
+  public LwwSet(ElementType... elements){
+    this(new HashSet<>(Arrays.asList(elements)));
+  }
+
+  public LwwSet(Set<ElementType> set){
+    struct = new HashMap<>();
+    for (ElementType e : set){
+      struct.put(e, new Timestamps().updateAdd());
+    }
+  }
+
+  public LwwSet(LwwSet<ElementType> first, LwwSet<ElementType> second){
+    Function<ElementType, Timestamps> timestampsFor = p -> {
+      Timestamps firstTs = first.struct.get(p);
+      Timestamps secondTs = second.struct.get(p);
+      if (firstTs == null){
+        return secondTs;
+      }
+      return firstTs.merge(secondTs);
+    };
+    struct = Stream.concat(first.struct.keySet().stream(), second.struct.keySet().stream())
+        .distinct().collect(Collectors.toMap(p -> p, timestampsFor));
+  }
+
+  // for serialization
+  LwwSet(Map<ElementType, Timestamps> struct){
+    this.struct = struct;
+  }
+
+  public LwwSet<ElementType> add(ElementType e){
+    return this.merge(new LwwSet<>(e));
+  }
+
+  Map<ElementType, Timestamps> getStruct(){
+    return struct;
+  }
+
+  public LwwSet<ElementType> remove(ElementType e){
+    Timestamps eTimestamps = struct.get(e);
+    if (eTimestamps == null || !eTimestamps.isPresent()){
+      return this;
+    }
+    Map<ElementType, Timestamps> changeMap = new HashMap<>();
+    changeMap.put(e, eTimestamps.updateRemove());
+    return this.merge(new LwwSet<>(changeMap));
+  }
+
+  @Override
+  public LwwSet<ElementType> merge(LwwSet<ElementType> other){
+    return new LwwSet<>(this, other);
+  }
+
+  @Override
+  public Set<ElementType> value(){
+    return struct.entrySet().stream()
+        .filter(entry -> entry.getValue().isPresent())
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public LwwSet<ElementType> optimize(){
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object obj){
+    return this == obj || (obj != null && getClass() == obj.getClass() && value().equals(((LwwSet) obj).value()));
+  }
 
   static class Timestamps {
     private final long latestAdd;
@@ -90,82 +165,5 @@ public class LwwSet<ElementType> implements CrdtAddRemoveSet<ElementType, Set<El
       }
       return new Timestamps(Math.max(latestAdd, other.latestAdd), Math.max(latestRemove, other.latestRemove));
     }
-  }
-
-
-  public LwwSet(){
-    struct = new HashMap<>();
-  }
-
-  @SafeVarargs
-  public LwwSet(ElementType... elements){
-    this(new HashSet<>(Arrays.asList(elements)));
-  }
-
-  public LwwSet(Set<ElementType> set){
-    struct = new HashMap<>();
-    for (ElementType e : set){
-      struct.put(e, new Timestamps().updateAdd());
-    }
-  }
-
-  public LwwSet(LwwSet<ElementType> first, LwwSet<ElementType> second){
-    Function<ElementType, Timestamps> timestampsFor = p -> {
-      Timestamps firstTs = first.struct.get(p);
-      Timestamps secondTs = second.struct.get(p);
-      if (firstTs == null){
-        return secondTs;
-      }
-      return firstTs.merge(secondTs);
-    };
-    struct = Stream.concat(first.struct.keySet().stream(), second.struct.keySet().stream())
-        .distinct().collect(Collectors.toMap(p -> p, timestampsFor));
-  }
-
-  public LwwSet<ElementType> add(ElementType e){
-    return this.merge(new LwwSet<>(e));
-  }
-
-  // for serialization
-  LwwSet(Map<ElementType, Timestamps> struct){
-    this.struct = struct;
-  }
-
-  Map<ElementType, Timestamps> getStruct(){
-    return struct;
-  }
-
-
-  public LwwSet<ElementType> remove(ElementType e){
-    Timestamps eTimestamps = struct.get(e);
-    if (eTimestamps == null || !eTimestamps.isPresent()){
-      return this;
-    }
-    Map<ElementType, Timestamps> changeMap = new HashMap<>();
-    changeMap.put(e, eTimestamps.updateRemove());
-    return this.merge(new LwwSet<>(changeMap));
-  }
-
-  @Override
-  public LwwSet<ElementType> merge(LwwSet<ElementType> other){
-    return new LwwSet<>(this, other);
-  }
-
-  @Override
-  public Set<ElementType> value(){
-    return struct.entrySet().stream()
-        .filter(entry -> entry.getValue().isPresent())
-        .map(Map.Entry::getKey)
-        .collect(Collectors.toSet());
-  }
-
-  @Override
-  public LwwSet<ElementType> optimize(){
-    return this;
-  }
-
-  @Override
-  public boolean equals(Object obj){
-    return this == obj || (obj != null && getClass() == obj.getClass() && value().equals(((LwwSet) obj).value()));
   }
 }

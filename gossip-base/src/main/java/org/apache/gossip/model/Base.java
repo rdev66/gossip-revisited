@@ -17,16 +17,14 @@
  */
 package org.apache.gossip.model;
 
-import org.apache.gossip.udp.UdpActiveGossipMessage;
-import org.apache.gossip.udp.UdpActiveGossipOk;
-import org.apache.gossip.udp.UdpPerNodeDataBulkMessage;
-import org.apache.gossip.udp.UdpNotAMemberFault;
-import org.apache.gossip.udp.UdpSharedDataBulkMessage;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.gossip.udp.UdpActiveGossipMessage;
+import org.apache.gossip.udp.UdpActiveGossipOk;
+import org.apache.gossip.udp.UdpNotAMemberFault;
+import org.apache.gossip.udp.UdpPerNodeDataBulkMessage;
+import org.apache.gossip.udp.UdpSharedDataBulkMessage;
 
 @JsonTypeInfo(  
         use = JsonTypeInfo.Id.CLASS,  

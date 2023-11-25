@@ -133,5 +133,4 @@ public class PNCounterTest {
     counter2 = counter2.merge(counter3);
     Assert.assertEquals(1, (long) counter3.value());
   }
-
 }

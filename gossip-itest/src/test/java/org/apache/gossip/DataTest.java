@@ -18,6 +18,18 @@
 package org.apache.gossip;
 
 import io.teknek.tunit.TUnit;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import org.apache.gossip.crdt.CrdtAddRemoveSet;
 import org.apache.gossip.crdt.GrowOnlyCounter;
 import org.apache.gossip.crdt.GrowOnlySet;
@@ -34,24 +46,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 public class DataTest {
+  private static final List<GossipManager> clients = new ArrayList<>();
   private final String gCounterKey = "crdtgc";
   private final String pnCounterKey = "crdtpn";
-
-  private static final List<GossipManager> clients = new ArrayList<>();
 
   @BeforeClass
   public static void initializeMembers() throws InterruptedException, UnknownHostException, URISyntaxException{

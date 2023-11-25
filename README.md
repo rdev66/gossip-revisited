@@ -1,12 +1,15 @@
 # Gossip ![Build status](https://travis-ci.org/edwardcapriolo/incubator-gossip.svg?)
 
-Gossip protocol is a method for a group of nodes to discover and check the liveliness of a cluster. More information can be found at http://en.wikipedia.org/wiki/Gossip_protocol.
+Gossip protocol is a method for a group of nodes to discover and check the liveliness of a cluster. More information can
+be found at http://en.wikipedia.org/wiki/Gossip_protocol.
 
-The original implementation was forked from https://code.google.com/p/java-gossip/. Several bug fixes and changes have already been added.
+The original implementation was forked from https://code.google.com/p/java-gossip/. Several bug fixes and changes have
+already been added.
 
-A set of easily-run examples, illustrating various features of Gossip, are available in the gossip-examples module. The README.md file, in that module described how to run those examples.
+A set of easily-run examples, illustrating various features of Gossip, are available in the gossip-examples module. The
+README.md file, in that module described how to run those examples.
 
-Below, a list of code snippits which show how to incorproate Apache Gossip into your project.  
+Below, a list of code snippits which show how to incorproate Apache Gossip into your project.
 
 Usage
 -----
@@ -23,7 +26,8 @@ To gossip you need one or more seed nodes. Seed is just a list of places to init
   }
 ```
 
-Here we start five gossip processes and check that they discover each other. (Normally these are on different hosts but here we give each process a distinct local ip.
+Here we start five gossip processes and check that they discover each other. (Normally these are on different hosts but
+here we give each process a distinct local ip.
 
 ```java
   List<GossipService> clients = new ArrayList<>();
@@ -64,7 +68,7 @@ For a very simple client setup with a settings file you first need a JSON file s
 
 where:
 
-* `cluster` - is the name of the cluster 
+* `cluster` - is the name of the cluster
 * `id` - is a unique id for this node (you can use any string, but above we use a UUID)
 * `uri` - is a URI object containing IP/hostname and port to use on the default adapter on the node's machine
 * `gossip_interval` - how often (in milliseconds) to gossip list of members to other node(s)

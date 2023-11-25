@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.apache.gossip.manager;
 
 import java.io.File;
@@ -24,71 +24,70 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.SharedDataMessage;
-import org.apache.log4j.Logger;
 
+@Slf4j
 public class UserDataPersister implements Runnable {
-  
-  private static final Logger LOGGER = Logger.getLogger(UserDataPersister.class);
-  private final GossipCore gossipCore; 
-  
+
+  private final GossipCore gossipCore;
+
   private final File perNodePath;
   private final File sharedPath;
   private final ObjectMapper objectMapper;
-  
+
   UserDataPersister(GossipCore gossipCore, File perNodePath, File sharedPath) {
     this.gossipCore = gossipCore;
     this.objectMapper = GossipManager.metdataObjectMapper;
     this.perNodePath = perNodePath;
     this.sharedPath = sharedPath;
   }
-  
+
   @SuppressWarnings("unchecked")
-  ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>> readPerNodeFromDisk(){
+  ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>> readPerNodeFromDisk() {
     if (!perNodePath.exists()) {
       return new ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>>();
     }
-    try (FileInputStream fos = new FileInputStream(perNodePath)){
+    try (FileInputStream fos = new FileInputStream(perNodePath)) {
       return objectMapper.readValue(fos, ConcurrentHashMap.class);
     } catch (IOException e) {
-      LOGGER.debug(e);
+      log.error("Error!", e);
     }
     return new ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>>();
   }
-  
-  void writePerNodeToDisk(){
-    try (FileOutputStream fos = new FileOutputStream(perNodePath)){
+
+  void writePerNodeToDisk() {
+    try (FileOutputStream fos = new FileOutputStream(perNodePath)) {
       objectMapper.writeValue(fos, gossipCore.getPerNodeData());
     } catch (IOException e) {
-      LOGGER.warn(e);
+      log.error("Error!", e);
     }
   }
-  
-  void writeSharedToDisk(){
-    try (FileOutputStream fos = new FileOutputStream(sharedPath)){
+
+  void writeSharedToDisk() {
+    try (FileOutputStream fos = new FileOutputStream(sharedPath)) {
       objectMapper.writeValue(fos, gossipCore.getSharedData());
     } catch (IOException e) {
-      LOGGER.warn(e);
+      log.error("Error!", e);
     }
   }
 
   @SuppressWarnings("unchecked")
-  ConcurrentHashMap<String, SharedDataMessage> readSharedDataFromDisk(){
+  ConcurrentHashMap<String, SharedDataMessage> readSharedDataFromDisk() {
     if (!sharedPath.exists()) {
       return new ConcurrentHashMap<>();
     }
-    try (FileInputStream fos = new FileInputStream(sharedPath)){
+    try (FileInputStream fos = new FileInputStream(sharedPath)) {
       return objectMapper.readValue(fos, ConcurrentHashMap.class);
     } catch (IOException e) {
-      LOGGER.debug(e);
+      log.error("Error!", e);
     }
-    return new ConcurrentHashMap<String, SharedDataMessage>();
+    return new ConcurrentHashMap<>();
   }
-  
-  /**
-   * Writes all pernode and shared data to disk 
-   */
+
+  /** Writes all pernode and shared data to disk */
   @Override
   public void run() {
     writePerNodeToDisk();

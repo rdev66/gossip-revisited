@@ -24,7 +24,7 @@ import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.ShutdownMessage;
 
 public class ShutdownMessageHandler implements MessageHandler {
-  
+
   /**
    * @param gossipCore context.
    * @param gossipManager context.

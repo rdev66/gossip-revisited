@@ -17,32 +17,31 @@
  */
 package org.apache.gossip.manager;
 
-import java.util.Map.Entry;
+import static com.codahale.metrics.MetricRegistry.name;
+
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.MetricRegistry;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.MetricRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.GossipSettings;
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.model.ActiveGossipOk;
-import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.Member;
+import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.Response;
 import org.apache.gossip.model.SharedDataMessage;
 import org.apache.gossip.model.ShutdownMessage;
 import org.apache.gossip.udp.*;
-import org.apache.log4j.Logger;
-
-import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * The ActiveGossipThread sends information. Pick a random partner and send the membership list to that partner
  */
+@Slf4j
 public abstract class AbstractActiveGossiper {
-
-  protected static final Logger LOGGER = Logger.getLogger(AbstractActiveGossiper.class);
 
   protected final GossipManager gossipManager;
   protected final GossipCore gossipCore;
@@ -128,7 +127,7 @@ public abstract class AbstractActiveGossiper {
         udpMessage.setUriFrom(me.getId());
       }
     }
-    if (udpMessage.getMessages().size() > 0) {
+    if (!udpMessage.getMessages().isEmpty()) {
       gossipCore.sendOneWay(udpMessage, member.getUri());
     }
   }
@@ -229,7 +228,7 @@ public abstract class AbstractActiveGossiper {
     if (r instanceof ActiveGossipOk){
       //maybe count metrics here
     } else {
-      LOGGER.debug("Message " + message + " generated response " + r);
+      log.debug("Message " + message + " generated response " + r);
     }
     sendMembershipHistogram.update(System.currentTimeMillis() - startTime);
   }
@@ -252,7 +251,7 @@ public abstract class AbstractActiveGossiper {
    */
   protected LocalMember selectPartner(List<LocalMember> memberList) {
     LocalMember member = null;
-    if (memberList.size() > 0) {
+    if (!memberList.isEmpty()) {
       int randomNeighborIndex = random.nextInt(memberList.size());
       member = memberList.get(randomNeighborIndex);
     }

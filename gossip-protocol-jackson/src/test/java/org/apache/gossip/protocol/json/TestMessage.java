@@ -17,6 +17,8 @@
  */
 package org.apache.gossip.protocol.json;
 
+import lombok.Data;
+import lombok.Getter;
 import org.apache.gossip.model.Base;
 import org.apache.gossip.udp.Trackable;
 
@@ -30,6 +32,7 @@ import java.util.Objects;
  * Note that there are no Jackson annotations.
  * getters and setters are the keys to making this work without the Jackson annotations.
  */
+@Data
 class TestMessage extends Base implements Trackable {
   private String unique;
   private String from;
@@ -41,9 +44,8 @@ class TestMessage extends Base implements Trackable {
   private Object[] arrayOfThings;
   private Map<String, String> mapOfThings = new HashMap<>();
 
-  @SuppressWarnings("unused")//Used by ObjectMapper
-  private TestMessage() {
-  }
+  @SuppressWarnings("unused") // Used by ObjectMapper
+  private TestMessage() {}
 
   TestMessage(String unique) {
     this.unique = unique;
@@ -53,9 +55,8 @@ class TestMessage extends Base implements Trackable {
     otherThing = new Subclass(Integer.toHexString(derivedField.hashCode()));
     floatValue = (float) unique.hashCode() / (float) from.hashCode();
     doubleValue = (double) uuid.hashCode() / (double) derivedField.hashCode();
-    arrayOfThings = new Object[]{
-        this.unique, from, uuid, derivedField, otherThing, floatValue, doubleValue
-    };
+    arrayOfThings =
+        new Object[] {this.unique, from, uuid, derivedField, otherThing, floatValue, doubleValue};
 
     String curThing = unique;
     for (int i = 0; i < 100; i++) {
@@ -91,18 +92,14 @@ class TestMessage extends Base implements Trackable {
     if (this == o) return true;
     if (!(o instanceof TestMessage)) return false;
     TestMessage that = (TestMessage) o;
-    return Objects.equals(unique, that.unique) &&
-        Objects.equals(from, that.from) &&
-        Objects.equals(getUuid(), that.getUuid()) &&
-        Objects.equals(derivedField, that.derivedField) &&
-        Objects.equals(floatValue, that.floatValue) &&
-        Objects.equals(doubleValue, that.doubleValue) &&
-        Arrays.equals(arrayOfThings, that.arrayOfThings) &&
-        Objects.equals(mapOfThings, that.mapOfThings);
-  }
-
-  public String getUnique() {
-    return unique;
+    return Objects.equals(unique, that.unique)
+        && Objects.equals(from, that.from)
+        && Objects.equals(getUuid(), that.getUuid())
+        && Objects.equals(derivedField, that.derivedField)
+        && Objects.equals(floatValue, that.floatValue)
+        && Objects.equals(doubleValue, that.doubleValue)
+        && Arrays.equals(arrayOfThings, that.arrayOfThings)
+        && Objects.equals(mapOfThings, that.mapOfThings);
   }
 
   public void setUnique(String unique) {
@@ -167,14 +164,21 @@ class TestMessage extends Base implements Trackable {
 
   @Override
   public int hashCode() {
-    return Objects.hash(unique, getUriFrom(), getUuid(), derivedField, floatValue, doubleValue, arrayOfThings, mapOfThings);
+    return Objects.hash(
+        unique,
+        getUriFrom(),
+        getUuid(),
+        derivedField,
+        floatValue,
+        doubleValue,
+        arrayOfThings,
+        mapOfThings);
   }
 
   static class Subclass {
     private String thing;
 
-    public Subclass() {
-    }
+    public Subclass() {}
 
     public Subclass(String thing) {
       this.thing = thing;

@@ -25,9 +25,9 @@ import java.util.List;
 public class Vote {
   private final String votingNode;
   private final Boolean voteValue; // TODO: 7/16/17  weight?
-  private Boolean voteExchange;
   private final List<String> liveMembers;
   private final List<String> deadMembers;
+  private Boolean voteExchange;
 
   public Vote(String votingNode, Boolean voteValue, Boolean voteExchange, List<String> liveMembers,
           List<String> deadMembers) {

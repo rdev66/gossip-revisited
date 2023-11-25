@@ -17,23 +17,14 @@
  */
 package org.apache.gossip.accrual;
 
-import org.apache.gossip.GossipSettings;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import org.apache.gossip.GossipSettings;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnitPlatform.class)
 public class FailureDetectorTest {
-
-  @FunctionalInterface
-  interface TriConsumer<A, B, C> {
-    void accept(A a, B b, C c);
-  }
 
   static final Double failureThreshold = new GossipSettings().getConvictThreshold();
 
@@ -52,8 +43,8 @@ public class FailureDetectorTest {
   public void normalDistribution() {
     FailureDetector fd = new FailureDetector(1, 1000, "normal");
     List<Integer> values = generateTimeList(0, 10000, 100);
-    Double deltaSum = 0.0;
-    Integer deltaCount = 0;
+    double deltaSum = 0.0;
+    int deltaCount = 0;
     for (int i = 0; i < values.size() - 1; i++) {
       fd.recordHeartbeat(values.get(i));
       if (i != 0) {
@@ -64,21 +55,23 @@ public class FailureDetectorTest {
     Integer lastRecorded = values.get(values.size() - 2);
 
     //after "step" delay we need to be considered UP
-    Assert.assertTrue(fd.computePhiMeasure(values.get(values.size() - 1)) < failureThreshold);
+    Assertions.assertTrue(fd.computePhiMeasure(values.get(values.size() - 1)) < failureThreshold);
 
     //if we check phi-measure after mean delay we get value for 0.5 probability(normal distribution)
-    Assert.assertEquals(fd.computePhiMeasure(lastRecorded + Math.round(deltaSum / deltaCount)), -Math.log10(0.5), 0.1);
+    Assertions.assertEquals(fd.computePhiMeasure(lastRecorded + Math.round(deltaSum / deltaCount)),
+            -Math.log10(0.5),
+            0.1);
   }
 
   @Test
   public void checkMinimumSamples() {
-    Integer minimumSamples = 5;
+    int minimumSamples = 5;
     FailureDetector fd = new FailureDetector(minimumSamples, 1000, "normal");
     for (int i = 0; i < minimumSamples + 1; i++) { // +1 because we don't place first heartbeat into structure
-      Assert.assertNull(fd.computePhiMeasure(100));
+      Assertions.assertNull(fd.computePhiMeasure(100));
       fd.recordHeartbeat(i);
     }
-    Assert.assertNotNull(fd.computePhiMeasure(100));
+    Assertions.assertNotNull(fd.computePhiMeasure(100));
   }
 
   @Test
@@ -86,28 +79,33 @@ public class FailureDetectorTest {
     final FailureDetector fd = new FailureDetector(5, 1000, "normal");
     TriConsumer<Integer, Integer, Integer> checkAlive = (begin, end, step) -> {
       List<Integer> times = generateTimeList(begin, end, step);
-      for (int i = 0; i < times.size(); i++) {
-        Double current = fd.computePhiMeasure(times.get(i));
-        if (current != null) {
-          Assert.assertTrue(current < failureThreshold);
+        for (Integer time : times) {
+            Double current = fd.computePhiMeasure(time);
+            if (current != null) {
+                Assertions.assertTrue(current < failureThreshold);
+            }
+            fd.recordHeartbeat(time);
         }
-        fd.recordHeartbeat(times.get(i));
-      }
     };
 
     TriConsumer<Integer, Integer, Integer> checkDeadMonotonic = (begin, end, step) -> {
       List<Integer> times = generateTimeList(begin, end, step);
       Double prev = null;
-      for (int i = 0; i < times.size(); i++) {
-        Double current = fd.computePhiMeasure(times.get(i));
-        if (current != null && prev != null) {
-          Assert.assertTrue(current >= prev);
+        for (Integer time : times) {
+            Double current = fd.computePhiMeasure(time);
+            if (current != null && prev != null) {
+                Assertions.assertTrue(current >= prev);
+            }
+            prev = current;
         }
-        prev = current;
-      }
     };
 
     checkAlive.accept(0, 20000, 100);
     checkDeadMonotonic.accept(20000, 20500, 5);
+  }
+
+  @FunctionalInterface
+  interface TriConsumer<A, B, C> {
+    void accept(A a, B b, C c);
   }
 }

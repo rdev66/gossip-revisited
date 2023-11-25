@@ -25,13 +25,11 @@ public class Member {
   private String uri;
   private String id;
   private Long heartbeat;
-  private Map<String,String> properties;
-  
-  public Member(){
-    
-  }
-  
-  public Member(String cluster, String uri, String id, Long heartbeat){
+  private Map<String, String> properties;
+
+  public Member() {}
+
+  public Member(String cluster, String uri, String id, Long heartbeat) {
     this.cluster = cluster;
     this.uri = uri;
     this.id = id;
@@ -80,8 +78,16 @@ public class Member {
 
   @Override
   public String toString() {
-    return "Member [cluster=" + cluster + ", uri=" + uri + ", id=" + id + ", heartbeat="
-            + heartbeat + ", properties=" + properties + "]";
+    return "Member [cluster="
+        + cluster
+        + ", uri="
+        + uri
+        + ", id="
+        + id
+        + ", heartbeat="
+        + heartbeat
+        + ", properties="
+        + properties
+        + "]";
   }
-  
 }

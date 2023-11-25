@@ -21,11 +21,11 @@ import org.apache.gossip.manager.GossipCore;
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.model.Base;
 
-public class TypedMessageHandler implements MessageHandler {
-  final private Class<?> messageClass;
-  final private MessageHandler messageHandler;
+public class TypedMessageHandlerWrapper implements MessageHandler {
+  private final Class<?> messageClass;
+  private final MessageHandler messageHandler;
 
-  public TypedMessageHandler(Class<?> messageClass, MessageHandler messageHandler) {
+  public TypedMessageHandlerWrapper(Class<?> messageClass, MessageHandler messageHandler) {
     if (messageClass == null || messageHandler == null) {
       throw new NullPointerException();
     }

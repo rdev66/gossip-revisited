@@ -94,12 +94,16 @@ public class RunStandardExamples {
 
   private static String usage() {
     return "Select and run (usually in a seperate terminal window) \n"
-            + "one of the the standard Examples,\n" + " 1. StandAloneNode\n"
-            + " 2. StandAloneNodeCrdtOrSet\n" + " 3. StandAlonePNCounter\n"
-            + " 4. StandAloneDatacenterAndRack\n" + "(See README.md in this modules)\n" + "\n"
-            + "Usage: mvn exec:java -Dexec.mainClass=org.apache.gossip.examples.RunStandardExamples  -Dexec.args=\"s c\"\n"
-            + "where...\n" + "  s - int - the example number from above\n"
-            + "  c - int - the channel number: 0, 1, or 2\n";
+        + "one of the the standard Examples,\n"
+        + " 1. StandAloneNode\n"
+        + " 2. StandAloneNodeCrdtOrSet\n"
+        + " 3. StandAlonePNCounter\n"
+        + " 4. StandAloneDatacenterAndRack\n"
+        + "(See README.md in this modules)\n"
+        + "\n"
+        + "Usage: mvn exec:java -Dexec.mainClass=org.apache.gossip.examples.RunStandardExamples  -Dexec.args=\"s c\"\n"
+        + "where...\n"
+        + "  s - int - the example number from above\n"
+        + "  c - int - the channel number: 0, 1, or 2\n";
   }
-
 }

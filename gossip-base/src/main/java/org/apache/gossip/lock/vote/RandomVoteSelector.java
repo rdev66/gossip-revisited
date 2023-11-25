@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * VoteSelector implementation which randomly select a voting node.
- */
+/** VoteSelector implementation which randomly select a voting node. */
 public class RandomVoteSelector implements VoteSelector {
 
   @Override

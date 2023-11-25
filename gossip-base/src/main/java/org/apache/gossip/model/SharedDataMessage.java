@@ -17,7 +17,6 @@
  */
 package org.apache.gossip.model;
 
-import org.apache.gossip.replication.AllReplicable;
 import org.apache.gossip.replication.Replicable;
 
 public class SharedDataMessage extends Base {

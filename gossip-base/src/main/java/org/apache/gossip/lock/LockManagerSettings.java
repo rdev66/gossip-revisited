@@ -20,9 +20,7 @@ package org.apache.gossip.lock;
 import org.apache.gossip.lock.vote.RandomVoteSelector;
 import org.apache.gossip.lock.vote.VoteSelector;
 
-/**
- * Stores the lock manager related settings.
- */
+/** Stores the lock manager related settings. */
 public class LockManagerSettings {
   // Time between vote updates in ms. Default is 1 second.
   private final int voteUpdateInterval;
@@ -36,29 +34,31 @@ public class LockManagerSettings {
   private final int resultCalculationDelay;
 
   /**
-   * Construct LockManagerSettings with default settings.
-   */
-  public static LockManagerSettings getLockManagerDefaultSettings() {
-    return new LockManagerSettings(1000, new RandomVoteSelector(), -1, 3, 1000);
-  }
-
-  /**
    * Construct a custom LockManagerSettings
    *
-   * @param voteUpdateInterval         Time between vote updates in milliseconds.
-   * @param voteSelector               Vote selection algorithm. Cannot be null
-   * @param numberOfNodes              Number of nodes available for voting. Set to negative value for auto calculate
+   * @param voteUpdateInterval Time between vote updates in milliseconds.
+   * @param voteSelector Vote selection algorithm. Cannot be null
+   * @param numberOfNodes Number of nodes available for voting. Set to negative value for auto
+   *     calculate
    * @param deadlockDetectionThreshold Number of times to test for deadlock before preventing
-   * @param resultCalculationDelay     Wait time between vote result calculation
+   * @param resultCalculationDelay Wait time between vote result calculation
    */
-  public LockManagerSettings(int voteUpdateInterval, VoteSelector voteSelector, int numberOfNodes,
-          int deadlockDetectionThreshold, int resultCalculationDelay) {
+  public LockManagerSettings(
+      int voteUpdateInterval,
+      VoteSelector voteSelector,
+      int numberOfNodes,
+      int deadlockDetectionThreshold,
+      int resultCalculationDelay) {
     this.voteUpdateInterval = voteUpdateInterval;
     this.voteSelector = voteSelector;
     this.numberOfNodes = numberOfNodes;
     this.deadlockDetectionThreshold = deadlockDetectionThreshold;
     this.resultCalculationDelay = resultCalculationDelay;
+  }
 
+  /** Construct LockManagerSettings with default settings. */
+  public static LockManagerSettings getLockManagerDefaultSettings() {
+    return new LockManagerSettings(1000, new RandomVoteSelector(), -1, 3, 1000);
   }
 
   public int getVoteUpdateInterval() {

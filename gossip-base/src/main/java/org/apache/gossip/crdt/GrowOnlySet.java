@@ -24,31 +24,30 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class GrowOnlySet<ElementType> implements CrdtSet<ElementType, Set<ElementType>, GrowOnlySet<ElementType>>{
+public class GrowOnlySet<ElementType>
+    implements CrdtSet<ElementType, Set<ElementType>, GrowOnlySet<ElementType>> {
 
   private final Set<ElementType> hidden = new LinkedHashSet<>();
-  
+
   @SuppressWarnings("unused")
   /*
    * Used by SerDe
    */
-  private GrowOnlySet(){
-    
-  }
-  
-  public GrowOnlySet(Set<ElementType> c){
+  private GrowOnlySet() {}
+
+  public GrowOnlySet(Set<ElementType> c) {
     hidden.addAll(c);
   }
-  
-  public GrowOnlySet(Collection<ElementType> c){
+
+  public GrowOnlySet(Collection<ElementType> c) {
     hidden.addAll(c);
   }
-  
-  public GrowOnlySet(GrowOnlySet<ElementType> first, GrowOnlySet<ElementType> second){
+
+  public GrowOnlySet(GrowOnlySet<ElementType> first, GrowOnlySet<ElementType> second) {
     hidden.addAll(first.value());
     hidden.addAll(second.value());
   }
-  
+
   @Override
   public GrowOnlySet<ElementType> merge(GrowOnlySet<ElementType> other) {
     return new GrowOnlySet<>(this, other);
@@ -60,7 +59,7 @@ public class GrowOnlySet<ElementType> implements CrdtSet<ElementType, Set<Elemen
     copy.addAll(hidden);
     return Collections.unmodifiableSet(copy);
   }
-  
+
   @Override
   public GrowOnlySet<ElementType> optimize() {
     return new GrowOnlySet<>(hidden);
@@ -135,23 +134,18 @@ public class GrowOnlySet<ElementType> implements CrdtSet<ElementType, Set<Elemen
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     @SuppressWarnings("rawtypes")
     GrowOnlySet other = (GrowOnlySet) obj;
     if (hidden == null) {
-      if (other.hidden != null)
-        return false;
-    } else if (!hidden.equals(other.hidden))
-      return false;
+      if (other.hidden != null) return false;
+    } else if (!hidden.equals(other.hidden)) return false;
     return true;
   }
 
-  Set<ElementType> getElements(){
+  Set<ElementType> getElements() {
     return hidden;
   }
 }

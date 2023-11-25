@@ -17,9 +17,8 @@
  */
 package org.apache.gossip.protocol;
 
-import org.apache.gossip.model.Base;
-
 import java.io.IOException;
+import org.apache.gossip.model.Base;
 
 /** interface for managing message marshaling. */
 public interface ProtocolManager {

@@ -20,6 +20,22 @@ package org.apache.gossip.manager;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.Serial;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.GossipSettings;
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.Member;
@@ -36,29 +52,14 @@ import org.apache.gossip.model.SharedDataMessage;
 import org.apache.gossip.protocol.ProtocolManager;
 import org.apache.gossip.transport.TransportManager;
 import org.apache.gossip.utils.ReflectionUtils;
-import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+@Slf4j
+public class GossipManager {
 
-public abstract class GossipManager {
 
-  public static final Logger LOGGER = Logger.getLogger(GossipManager.class);
-  
   // this mapper is used for ring and user-data persistence only. NOT messages.
   public static final ObjectMapper metdataObjectMapper = new ObjectMapper() {
+    @Serial
     private static final long serialVersionUID = 1L;
   {
     enableDefaultTyping();
@@ -69,10 +70,6 @@ public abstract class GossipManager {
   private final LocalMember me;
   private final GossipSettings settings;
   private final AtomicBoolean gossipServiceRunning;
-  
-  private TransportManager transportManager;
-  private ProtocolManager protocolManager;
-  
   private final GossipCore gossipCore;
   private final DataReaper dataReaper;
   private final Clock clock;
@@ -81,9 +78,10 @@ public abstract class GossipManager {
   private final RingStatePersister ringState;
   private final UserDataPersister userDataState;
   private final GossipMemberStateRefresher memberStateRefresher;
-  
   private final MessageHandler messageHandler;
   private final LockManager lockManager;
+  private TransportManager transportManager;
+  private ProtocolManager protocolManager;
 
   public GossipManager(String cluster,
                        URI uri, String id, Map<String, String> properties, GossipSettings settings,
@@ -122,6 +120,21 @@ public abstract class GossipManager {
     readSavedDataState();
   }
 
+  public static File buildRingStatePath(GossipManager manager) {
+    return new File(manager.getSettings().getPathToRingState(), "ringstate." + manager.getMyself().getClusterName() + "."
+        + manager.getMyself().getId() + ".json");
+  }
+
+  public static File buildSharedDataPath(GossipManager manager){
+    return new File(manager.getSettings().getPathToDataState(), "shareddata."
+            + manager.getMyself().getClusterName() + "." + manager.getMyself().getId() + ".json");
+  }
+
+  public static File buildPerNodeDataPath(GossipManager manager) {
+    return new File(manager.getSettings().getPathToDataState(), "pernodedata."
+            + manager.getMyself().getClusterName() + "." + manager.getMyself().getId() + ".json");
+  }
+
   public MessageHandler getMessageHandler() {
     return messageHandler;
   }
@@ -144,7 +157,7 @@ public abstract class GossipManager {
                     .filter(entry -> GossipState.DOWN.equals(entry.getValue()))
                     .map(Entry::getKey).collect(Collectors.toList()));
   }
-
+  
   /**
    *
    * @return a read only list of members found in the UP state
@@ -166,26 +179,26 @@ public abstract class GossipManager {
    * thread and start the receiver thread.
    */
   public void init() {
-    
+
     // protocol manager and transport managers are specified in settings.
     // construct them here via reflection.
-    
+
     protocolManager = ReflectionUtils.constructWithReflection(
         settings.getProtocolManagerClass(),
         new Class<?>[] { GossipSettings.class, String.class, MetricRegistry.class },
         new Object[] { settings, me.getId(), this.getRegistry() }
     );
-    
+
     transportManager = ReflectionUtils.constructWithReflection(
         settings.getTransportManagerClass(),
         new Class<?>[] { GossipManager.class, GossipCore.class},
         new Object[] { this, gossipCore }
     );
-    
+
     // start processing gossip messages.
     transportManager.startEndpoint();
     transportManager.startActiveGossiper();
-    
+
     dataReaper.init();
     if (settings.isPersistRingState()) {
       scheduledServiced.scheduleAtFixedRate(ringState, 60, 60, TimeUnit.SECONDS);
@@ -194,9 +207,9 @@ public abstract class GossipManager {
       scheduledServiced.scheduleAtFixedRate(userDataState, 60, 60, TimeUnit.SECONDS);
     }
     memberStateRefresher.init();
-    LOGGER.debug("The GossipManager is started.");
+    log.debug("The GossipManager is started.");
   }
-  
+
   private void readSavedRingState() {
     if (settings.isPersistRingState()) {
       for (LocalMember l : ringState.readFromDisk()) {
@@ -238,7 +251,7 @@ public abstract class GossipManager {
     try {
       scheduledServiced.awaitTermination(1, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      LOGGER.error(e);
+      log.error("Error!", e);
     }
     scheduledServiced.shutdownNow();
   }
@@ -331,34 +344,19 @@ public abstract class GossipManager {
   public Clock getClock() {
     return clock;
   }
-
-  public MetricRegistry getRegistry() {
-    return registry;
-  }
-
-  public ProtocolManager getProtocolManager() {
-    return protocolManager;
-  }
-
-  public TransportManager getTransportManager() {
-    return transportManager;
-  }
   
   // todo: consider making these path methods part of GossipSettings
   
-  public static File buildRingStatePath(GossipManager manager) {
-    return new File(manager.getSettings().getPathToRingState(), "ringstate." + manager.getMyself().getClusterName() + "."
-        + manager.getMyself().getId() + ".json");
+  public MetricRegistry getRegistry() {
+    return registry;
   }
   
-  public static File buildSharedDataPath(GossipManager manager){
-    return new File(manager.getSettings().getPathToDataState(), "shareddata."
-            + manager.getMyself().getClusterName() + "." + manager.getMyself().getId() + ".json");
+  public ProtocolManager getProtocolManager() {
+    return protocolManager;
   }
   
-  public static File buildPerNodeDataPath(GossipManager manager) {
-    return new File(manager.getSettings().getPathToDataState(), "pernodedata."
-            + manager.getMyself().getClusterName() + "." + manager.getMyself().getId() + ".json");
+  public TransportManager getTransportManager() {
+    return transportManager;
   }
   
   public void registerPerNodeDataSubscriber(UpdateNodeDataEventHandler handler){

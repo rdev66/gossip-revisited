@@ -39,16 +39,17 @@ import java.util.stream.Stream;
 */
 
 @Ignore
-public abstract class AddRemoveStringSetTest<SetType extends CrdtAddRemoveSet<String, Set<String>, SetType>> {
+public abstract class AddRemoveStringSetTest<
+    SetType extends CrdtAddRemoveSet<String, Set<String>, SetType>> {
+
+  private Set<String> sampleSet;
 
   abstract SetType construct(Set<String> set);
 
   abstract SetType construct();
 
-  private Set<String> sampleSet;
-
   @Before
-  public void setup(){
+  public void setup() {
     sampleSet = new HashSet<>();
     sampleSet.add("4");
     sampleSet.add("5");
@@ -56,24 +57,25 @@ public abstract class AddRemoveStringSetTest<SetType extends CrdtAddRemoveSet<St
   }
 
   @Test
-  public void abstractSetConstructorTest(){
+  public void abstractSetConstructorTest() {
     Assert.assertEquals(construct(sampleSet).value(), sampleSet);
   }
 
   @Test
-  public void abstractStressWithSetTest(){
+  public void abstractStressWithSetTest() {
     Set<String> hashSet = new HashSet<>();
     SetType set = construct();
-    for (int it = 0; it < 40; it++){
+    for (int it = 0; it < 40; it++) {
       SetType newSet;
-      if (it % 5 == 1){
-        //deleting existing
-        String forDelete = hashSet.stream().skip((long) (hashSet.size() * Math.random())).findFirst().get();
+      if (it % 5 == 1) {
+        // deleting existing
+        String forDelete =
+            hashSet.stream().skip((long) (hashSet.size() * Math.random())).findFirst().get();
         newSet = set.remove(forDelete);
         Assert.assertEquals(set.value(), hashSet); // check old version is immutable
         hashSet.remove(forDelete);
       } else {
-        //adding
+        // adding
         String forAdd = String.valueOf((int) (10000 * Math.random()));
         newSet = set.add(forAdd);
         Assert.assertEquals(set.value(), hashSet); // check old version is immutable
@@ -85,7 +87,7 @@ public abstract class AddRemoveStringSetTest<SetType extends CrdtAddRemoveSet<St
   }
 
   @Test
-  public void abstractEqualsTest(){
+  public void abstractEqualsTest() {
     SetType set = construct(sampleSet);
     Assert.assertFalse(set.equals(sampleSet));
     SetType newSet = set.add("25");
@@ -95,7 +97,7 @@ public abstract class AddRemoveStringSetTest<SetType extends CrdtAddRemoveSet<St
   }
 
   @Test
-  public void abstractRemoveMissingTest(){
+  public void abstractRemoveMissingTest() {
     SetType set = construct(sampleSet);
     set = set.add("25");
     set = set.remove("25");
@@ -107,15 +109,16 @@ public abstract class AddRemoveStringSetTest<SetType extends CrdtAddRemoveSet<St
   }
 
   @Test
-  public void abstractStressMergeTest(){
-    // in one-process context, add, remove and merge operations of lww are equal to operations of Set
+  public void abstractStressMergeTest() {
+    // in one-process context, add, remove and merge operations of lww are equal to operations of
+    // Set
     // we've already checked it. Now just check merge
     Set<String> hashSet1 = new HashSet<>(), hashSet2 = new HashSet<>();
     SetType set1 = construct(), set2 = construct();
 
-    for (int it = 0; it < 100; it++){
+    for (int it = 0; it < 100; it++) {
       String forAdd = String.valueOf((int) (10000 * Math.random()));
-      if (it % 2 == 0){
+      if (it % 2 == 0) {
         hashSet1.add(forAdd);
         set1 = set1.add(forAdd);
       } else {
@@ -125,12 +128,13 @@ public abstract class AddRemoveStringSetTest<SetType extends CrdtAddRemoveSet<St
     }
     Assert.assertEquals(set1.value(), hashSet1);
     Assert.assertEquals(set2.value(), hashSet2);
-    Set<String> mergedSet = Stream.concat(hashSet1.stream(), hashSet2.stream()).collect(Collectors.toSet());
+    Set<String> mergedSet =
+        Stream.concat(hashSet1.stream(), hashSet2.stream()).collect(Collectors.toSet());
     Assert.assertEquals(set1.merge(set2).value(), mergedSet);
   }
 
   @Test
-  public void abstractOptimizeTest(){
+  public void abstractOptimizeTest() {
     Assert.assertEquals(construct(sampleSet).value(), sampleSet);
     Assert.assertEquals(construct(sampleSet).optimize().value(), sampleSet);
   }

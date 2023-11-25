@@ -17,10 +17,9 @@
  */
 package org.apache.gossip;
 
-import org.apache.gossip.lock.LockManagerSettings;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.gossip.lock.LockManagerSettings;
 
 /**
  * In this object the settings used by the GossipService are held.
@@ -108,23 +107,16 @@ public class GossipSettings {
   }
 
   /**
-   * Set the cleanup interval. This is the time between the last heartbeat received from a member
-   * and when it will be marked as dead.
-   * 
-   * @param cleanupInterval
-   *          The cleanup interval in ms.
-   */
-  public void setCleanupInterval(int cleanupInterval) {
-    this.cleanupInterval = cleanupInterval;
-  }
-
-  /**
    * Get the gossip interval.
-   * 
+   *
    * @return The gossip interval in ms.
    */
   public int getGossipInterval() {
     return gossipInterval;
+  }
+
+  public void setGossipInterval(int gossipInterval) {
+    this.gossipInterval = gossipInterval;
   }
 
   /**
@@ -134,6 +126,17 @@ public class GossipSettings {
    */
   public int getCleanupInterval() {
     return cleanupInterval;
+  }
+
+  /**
+   * Set the cleanup interval. This is the time between the last heartbeat received from a member
+   * and when it will be marked as dead.
+   *
+   * @param cleanupInterval
+   *          The cleanup interval in ms.
+   */
+  public void setCleanupInterval(int cleanupInterval) {
+    this.cleanupInterval = cleanupInterval;
   }
 
   public int getMinimumSamples() {
@@ -158,10 +161,6 @@ public class GossipSettings {
 
   public void setConvictThreshold(double convictThreshold) {
     this.convictThreshold = convictThreshold;
-  }
-
-  public void setGossipInterval(int gossipInterval) {
-    this.gossipInterval = gossipInterval;
   }
 
   public String getDistribution() {

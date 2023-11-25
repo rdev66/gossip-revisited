@@ -17,6 +17,11 @@
  */
 package org.apache.gossip.manager.handlers;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.Member;
 import org.apache.gossip.RemoteMember;
 import org.apache.gossip.manager.GossipCore;
@@ -26,11 +31,7 @@ import org.apache.gossip.udp.UdpActiveGossipMessage;
 import org.apache.gossip.udp.UdpActiveGossipOk;
 import org.apache.gossip.udp.UdpNotAMemberFault;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-
+@Slf4j
 public class ActiveGossipMessageHandler implements MessageHandler {
   
   /**
@@ -49,7 +50,7 @@ public class ActiveGossipMessageHandler implements MessageHandler {
       try {
         u = new URI(activeGossipMessage.getMembers().get(i).getUri());
       } catch (URISyntaxException e) {
-        GossipCore.LOGGER.debug("Gossip message with faulty URI", e);
+        log.debug("Gossip message with faulty URI", e);
         continue;
       }
       RemoteMember member = new RemoteMember(
@@ -66,7 +67,7 @@ public class ActiveGossipMessageHandler implements MessageHandler {
         f.setException("Not a member of this cluster " + i);
         f.setUriFrom(activeGossipMessage.getUriFrom());
         f.setUuid(activeGossipMessage.getUuid());
-        GossipCore.LOGGER.warn(f);
+        log.warn("Warn", f);
         gossipCore.sendOneWay(f, member.getUri());
         continue;
       }

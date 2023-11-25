@@ -22,8 +22,8 @@ import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.model.Base;
 import org.apache.gossip.udp.UdpSharedDataMessage;
 
-public class SharedDataMessageHandler implements MessageHandler{
-  
+public class SharedDataMessageHandler implements MessageHandler {
+
   /**
    * @param gossipCore context.
    * @param gossipManager context.

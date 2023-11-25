@@ -17,23 +17,41 @@
  */
 package org.apache.gossip.replication;
 
-import org.apache.gossip.LocalMember;
-import org.apache.gossip.manager.DatacenterRackAwareActiveGossiper;
-import org.apache.gossip.model.SharedDataMessage;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.gossip.LocalMember;
+import org.apache.gossip.manager.DatacenterRackAwareActiveGossiper;
+import org.apache.gossip.model.SharedDataMessage;
+import org.junit.Assert;
+import org.junit.Test;
 
-@RunWith(JUnitPlatform.class)
 public class DataReplicationTest {
+  
+  private static SharedDataMessage getSharedNodeData(String key, String value,
+          Replicable<SharedDataMessage> replicable) {
+    SharedDataMessage g = new SharedDataMessage();
+    g.setExpireAt(Long.MAX_VALUE);
+    g.setKey(key);
+    g.setPayload(value);
+    g.setTimestamp(System.currentTimeMillis());
+    g.setReplicable(replicable);
+    return g;
+  }
+  
+  private static LocalMember getLocalMember(URI uri, String id){
+    return new LocalMember("cluster1", uri, id, 0, null, 1, 0, "");
+  }
+  
+  private static LocalMember getLocalMemberDc(URI uri, String id, String dataCenter, String rack){
+    Map<String, String> props = new HashMap<>();
+    props.put(DatacenterRackAwareActiveGossiper.DATACENTER, dataCenter);
+    props.put(DatacenterRackAwareActiveGossiper.RACK, rack);
+    return new LocalMember("cluster1", uri, id, 0, props, 1, 0, "");
+  }
   
   @Test
   public void dataReplicateAllTest() throws URISyntaxException {
@@ -65,7 +83,7 @@ public class DataReplicationTest {
     SharedDataMessage message = getSharedNodeData("whiteList", "Only allow some nodes",
             new WhiteListReplicable<>(whiteList));
     LocalMember me =  getLocalMember(new URI("udp://127.0.0.1:8004"),"4");
-    
+
     // data should replicate to node 1 and 2 but not 3
     Assert.assertEquals(true,
             message.getReplicable().shouldReplicate(me, memberList.get(0), message));
@@ -102,7 +120,7 @@ public class DataReplicationTest {
     List<LocalMember> blackList = new ArrayList<>();
     blackList.add(memberList.get(0));
     blackList.add(memberList.get(1));
-    
+
     SharedDataMessage message = getSharedNodeData("blackList", "Disallow some nodes",
             new BlackListReplicable<>(blackList));
     LocalMember me = getLocalMember(new URI("udp://127.0.0.1:8004"),"4");
@@ -115,27 +133,27 @@ public class DataReplicationTest {
     Assert.assertEquals(true,
             message.getReplicable().shouldReplicate(me, memberList.get(2), message));
   }
-  
+
   @Test
   public void dataReplicateBlackListNullTest() throws URISyntaxException {
-    
+
     List<LocalMember> memberList = new ArrayList<>();
     memberList.add(getLocalMember(new URI("udp://127.0.0.1:8001"),"1"));
     memberList.add(getLocalMember(new URI("udp://127.0.0.1:8002"),"2"));
-    
+
     SharedDataMessage message = getSharedNodeData("blackList", "Disallow some nodes",
             new BlackListReplicable<>(null));
-    
+
     // data should replicate if no blacklist specified
     Assert.assertEquals(true,
             message.getReplicable().shouldReplicate(memberList.get(0), memberList.get(1), message));
     Assert.assertEquals(true,
             message.getReplicable().shouldReplicate(memberList.get(1), memberList.get(0), message));
   }
-  
+
   @Test
   public void dataReplicateDataCenterTest() throws URISyntaxException {
-    
+
     List<LocalMember> memberListDc1 = new ArrayList<>();
     List<LocalMember> memberListDc2 = new ArrayList<>();
 
@@ -156,17 +174,17 @@ public class DataReplicationTest {
             .shouldReplicate(memberListDc1.get(0), memberListDc1.get(1), message));
     Assert.assertEquals(true, message.getReplicable()
             .shouldReplicate(memberListDc2.get(0), memberListDc2.get(1), message));
-    
+
     // data should not replicate to data center 2
     Assert.assertEquals(false, message.getReplicable()
             .shouldReplicate(memberListDc1.get(0), memberListDc2.get(0), message));
     Assert.assertEquals(false, message.getReplicable()
             .shouldReplicate(memberListDc1.get(1), memberListDc2.get(1), message));
   }
-  
+
   @Test
   public void dataReplicateDataCenterUnknownDataCenterTest() throws URISyntaxException {
-    
+
     List<LocalMember> memberListDc1 = new ArrayList<>();
     memberListDc1
             .add(getLocalMemberDc(new URI("udp://10.0.0.1:8000"), "1", "DataCenter1", "Rack1"));
@@ -174,7 +192,7 @@ public class DataReplicationTest {
     Map<String, String> properties = new HashMap<>();
     LocalMember unknownDc = new LocalMember("cluster1", new URI("udp://10.0.1.2:8000"), "12", 0,
             properties, 1, 0, "");
-    
+
     SharedDataMessage message = getSharedNodeData("datacenter1","I am in data center 1 rack 1", new DataCenterReplicable<>());
 
     // data should not replicate from dc1 to unknown node
@@ -184,27 +202,5 @@ public class DataReplicationTest {
     Assert.assertEquals(true, message.getReplicable()
             .shouldReplicate(unknownDc, memberListDc1.get(0), message));
 
-  }
-
-  private static SharedDataMessage getSharedNodeData(String key, String value,
-          Replicable<SharedDataMessage> replicable) {
-    SharedDataMessage g = new SharedDataMessage();
-    g.setExpireAt(Long.MAX_VALUE);
-    g.setKey(key);
-    g.setPayload(value);
-    g.setTimestamp(System.currentTimeMillis());
-    g.setReplicable(replicable);
-    return g;
-  }
-
-  private static LocalMember getLocalMember(URI uri, String id){
-    return new LocalMember("cluster1", uri, id, 0, null, 1, 0, "");
-  }
-
-  private static LocalMember getLocalMemberDc(URI uri, String id, String dataCenter, String rack){
-    Map<String, String> props = new HashMap<>();
-    props.put(DatacenterRackAwareActiveGossiper.DATACENTER, dataCenter);
-    props.put(DatacenterRackAwareActiveGossiper.RACK, rack);
-    return new LocalMember("cluster1", uri, id, 0, props, 1, 0, "");
   }
 }

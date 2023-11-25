@@ -20,13 +20,12 @@ package org.apache.gossip.protocol;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import org.apache.gossip.GossipSettings;
-import org.apache.gossip.manager.PassiveGossipConstants;
-import org.apache.gossip.model.Base;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.gossip.GossipSettings;
+import org.apache.gossip.manager.PassiveGossipConstants;
+import org.apache.gossip.model.Base;
 
 // doesn't serialize anything besides longs. Uses a static lookup table to read and write objects.
 public class UnitTestProtocolManager implements ProtocolManager {

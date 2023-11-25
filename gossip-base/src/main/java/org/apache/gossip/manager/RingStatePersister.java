@@ -17,6 +17,7 @@
  */ 
 package org.apache.gossip.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,14 +25,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.LocalMember;
-import org.apache.log4j.Logger;
 
+@Slf4j
 public class RingStatePersister implements Runnable {
 
-  private static final Logger LOGGER = Logger.getLogger(RingStatePersister.class);
   private final File path;
   // NOTE: this is a different instance than what gets used for message marshalling.
   private final ObjectMapper objectMapper;
@@ -53,7 +52,7 @@ public class RingStatePersister implements Runnable {
     try (FileOutputStream fos = new FileOutputStream(path)){
       objectMapper.writeValue(fos, i);
     } catch (IOException e) {
-      LOGGER.debug(e);
+      log.error("Error!", e);
     }
   }
 
@@ -65,7 +64,7 @@ public class RingStatePersister implements Runnable {
     try (FileInputStream fos = new FileInputStream(path)){
       return objectMapper.readValue(fos, ArrayList.class);
     } catch (IOException e) {
-      LOGGER.debug(e);
+      log.error("Error", e);
     }
     return new ArrayList<>();
   }

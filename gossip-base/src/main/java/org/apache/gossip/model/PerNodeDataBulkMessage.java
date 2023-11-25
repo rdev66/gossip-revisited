@@ -32,8 +32,10 @@ public class PerNodeDataBulkMessage extends Base {
     return messages;
   }
 
-  @Override public String toString() {
-    return "GossipDataBulkMessage[" + messages.stream().map(Object::toString)
-            .collect(Collectors.joining(",")) + "]";
+  @Override
+  public String toString() {
+    return "GossipDataBulkMessage["
+        + messages.stream().map(Object::toString).collect(Collectors.joining(","))
+        + "]";
   }
 }

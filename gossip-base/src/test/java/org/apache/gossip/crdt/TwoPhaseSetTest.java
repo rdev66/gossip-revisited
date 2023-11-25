@@ -30,7 +30,7 @@ public class TwoPhaseSetTest {
   private Set<String> sampleSet;
 
   @Before
-  public void setup(){
+  public void setup() {
     sampleSet = new HashSet<>();
     sampleSet.add("a");
     sampleSet.add("b");
@@ -38,12 +38,12 @@ public class TwoPhaseSetTest {
   }
 
   @Test
-  public void setConstructorTest(){
+  public void setConstructorTest() {
     Assert.assertEquals(new TwoPhaseSet<>(sampleSet).value(), sampleSet);
   }
 
   @Test
-  public void valueTest(){
+  public void valueTest() {
     Set<Character> added = new HashSet<>();
     added.add('a');
     added.add('b');
@@ -53,7 +53,7 @@ public class TwoPhaseSetTest {
   }
 
   @Test
-  public void optimizeTest(){
+  public void optimizeTest() {
     TwoPhaseSet<String> set = new TwoPhaseSet<>(sampleSet);
     set = set.remove("b");
     Assert.assertEquals(set.optimize(), set);
@@ -62,7 +62,7 @@ public class TwoPhaseSetTest {
   }
 
   @Test
-  public void immutabilityTest(){
+  public void immutabilityTest() {
     TwoPhaseSet<String> set = new TwoPhaseSet<>(sampleSet);
     TwoPhaseSet<String> newSet = set.remove("b");
     Assert.assertNotEquals(set, newSet);
@@ -70,12 +70,13 @@ public class TwoPhaseSetTest {
   }
 
   @Test
-  public void removeMissingAddExistingLimitsTest(){
-    BiConsumer<TwoPhaseSet<?>, TwoPhaseSet<?>> checkInternals = (f, s) -> {
-      Assert.assertEquals(s, f);
-      Assert.assertEquals(s.getRemoved(), f.getRemoved());
-      Assert.assertEquals(s.getAdded(), f.getAdded());
-    };
+  public void removeMissingAddExistingLimitsTest() {
+    BiConsumer<TwoPhaseSet<?>, TwoPhaseSet<?>> checkInternals =
+        (f, s) -> {
+          Assert.assertEquals(s, f);
+          Assert.assertEquals(s.getRemoved(), f.getRemoved());
+          Assert.assertEquals(s.getAdded(), f.getAdded());
+        };
     TwoPhaseSet<String> set = new TwoPhaseSet<>(sampleSet);
     // remove missing
     checkInternals.accept(set, set.remove("e"));
@@ -83,11 +84,13 @@ public class TwoPhaseSetTest {
     checkInternals.accept(set, set.add("a"));
     // limits
     TwoPhaseSet<String> newSet = set.remove("a"); // allow this remove
-    Assert.assertEquals(newSet.add("a"), new TwoPhaseSet<>("b", "d")); // discard this add, "a" was added and removed
+    Assert.assertEquals(
+        newSet.add("a"),
+        new TwoPhaseSet<>("b", "d")); // discard this add, "a" was added and removed
   }
 
   @Test
-  public void mergeTest(){
+  public void mergeTest() {
     TwoPhaseSet<String> f = new TwoPhaseSet<>(sampleSet);
     TwoPhaseSet<String> s = new TwoPhaseSet<>("a", "c");
     s = s.remove("a");

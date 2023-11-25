@@ -17,19 +17,19 @@
  */
 package org.apache.gossip.accrual;
 
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.distribution.ExponentialDistributionImpl;
-import org.apache.commons.math.distribution.NormalDistributionImpl;
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.exception.MathArithmeticException;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+@Slf4j
 public class FailureDetector {
 
-  public static final Logger LOGGER = Logger.getLogger(FailureDetector.class);
   private final DescriptiveStatistics descriptiveStatistics;
   private final long minimumSamples;
-  private volatile long latestHeartbeatMs = -1;
   private final String distribution;
+  private volatile long latestHeartbeatMs = -1;
 
   public FailureDetector(long minimumSamples, int windowSize, String distribution) {
     descriptiveStatistics = new DescriptiveStatistics(windowSize);
@@ -62,18 +62,18 @@ public class FailureDetector {
       double probability;
       if (distribution.equals("normal")) {
         double standardDeviation = descriptiveStatistics.getStandardDeviation();
-        standardDeviation = standardDeviation < 0.1 ? 0.1 : standardDeviation;
-        probability = new NormalDistributionImpl(descriptiveStatistics.getMean(), standardDeviation).cumulativeProbability(delta);
+        standardDeviation = Math.max(standardDeviation, 0.1);
+        probability = new NormalDistribution(descriptiveStatistics.getMean(), standardDeviation).cumulativeProbability(delta);
       } else {
-        probability = new ExponentialDistributionImpl(descriptiveStatistics.getMean()).cumulativeProbability(delta);
+        probability = new ExponentialDistribution(descriptiveStatistics.getMean()).cumulativeProbability(delta);
       }
       final double eps = 1e-12;
       if (1 - probability < eps) {
         probability = 1.0;
       }
       return -1.0d * Math.log10(1.0d - probability);
-    } catch (MathException | IllegalArgumentException e) {
-      LOGGER.debug(e);
+    } catch (MathArithmeticException | IllegalArgumentException e) {
+      log.error("Error!", e);
       return null;
     }
   }

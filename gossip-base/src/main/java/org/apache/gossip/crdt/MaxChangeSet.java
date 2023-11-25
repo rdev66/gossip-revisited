@@ -37,68 +37,72 @@ import java.util.stream.Stream;
   DataTest - integration test with 2 nodes, MaxChangeSet was serialized/deserialized, sent between nodes, merged
 */
 
-public class MaxChangeSet<ElementType> implements CrdtAddRemoveSet<ElementType, Set<ElementType>, MaxChangeSet<ElementType>> {
+public class MaxChangeSet<ElementType>
+    implements CrdtAddRemoveSet<ElementType, Set<ElementType>, MaxChangeSet<ElementType>> {
   private final Map<ElementType, Integer> struct;
 
-  public MaxChangeSet(){
+  public MaxChangeSet() {
     struct = new HashMap<>();
   }
 
   @SafeVarargs
-  public MaxChangeSet(ElementType... elements){
+  public MaxChangeSet(ElementType... elements) {
     this(new HashSet<>(Arrays.asList(elements)));
   }
 
-  public MaxChangeSet(Set<ElementType> set){
+  public MaxChangeSet(Set<ElementType> set) {
     struct = new HashMap<>();
-    for (ElementType e : set){
+    for (ElementType e : set) {
       struct.put(e, 1);
     }
   }
 
-  public MaxChangeSet(MaxChangeSet<ElementType> first, MaxChangeSet<ElementType> second){
-    Function<ElementType, Integer> valueFor = element ->
-        Math.max(first.struct.getOrDefault(element, 0), second.struct.getOrDefault(element, 0));
-    struct = Stream.concat(first.struct.keySet().stream(), second.struct.keySet().stream())
-        .distinct().collect(Collectors.toMap(p -> p, valueFor));
+  public MaxChangeSet(MaxChangeSet<ElementType> first, MaxChangeSet<ElementType> second) {
+    Function<ElementType, Integer> valueFor =
+        element ->
+            Math.max(first.struct.getOrDefault(element, 0), second.struct.getOrDefault(element, 0));
+    struct =
+        Stream.concat(first.struct.keySet().stream(), second.struct.keySet().stream())
+            .distinct()
+            .collect(Collectors.toMap(p -> p, valueFor));
   }
 
   // for serialization
-  MaxChangeSet(Map<ElementType, Integer> struct){
+  MaxChangeSet(Map<ElementType, Integer> struct) {
     this.struct = struct;
   }
 
-  Map<ElementType, Integer> getStruct(){
+  Map<ElementType, Integer> getStruct() {
     return struct;
   }
 
-  private MaxChangeSet<ElementType> increment(ElementType e){
+  private MaxChangeSet<ElementType> increment(ElementType e) {
     Map<ElementType, Integer> changeMap = new HashMap<>();
     changeMap.put(e, struct.getOrDefault(e, 0) + 1);
     return this.merge(new MaxChangeSet<>(changeMap));
   }
 
-  public MaxChangeSet<ElementType> add(ElementType e){
-    if (struct.getOrDefault(e, 0) % 2 == 1){
+  public MaxChangeSet<ElementType> add(ElementType e) {
+    if (struct.getOrDefault(e, 0) % 2 == 1) {
       return this;
     }
     return increment(e);
   }
 
-  public MaxChangeSet<ElementType> remove(ElementType e){
-    if (struct.getOrDefault(e, 0) % 2 == 0){
+  public MaxChangeSet<ElementType> remove(ElementType e) {
+    if (struct.getOrDefault(e, 0) % 2 == 0) {
       return this;
     }
     return increment(e);
   }
 
   @Override
-  public MaxChangeSet<ElementType> merge(MaxChangeSet<ElementType> other){
+  public MaxChangeSet<ElementType> merge(MaxChangeSet<ElementType> other) {
     return new MaxChangeSet<>(this, other);
   }
 
   @Override
-  public Set<ElementType> value(){
+  public Set<ElementType> value() {
     return struct.entrySet().stream()
         .filter(entry -> (entry.getValue() % 2 == 1))
         .map(Map.Entry::getKey)
@@ -106,12 +110,15 @@ public class MaxChangeSet<ElementType> implements CrdtAddRemoveSet<ElementType, 
   }
 
   @Override
-  public MaxChangeSet<ElementType> optimize(){
+  public MaxChangeSet<ElementType> optimize() {
     return this;
   }
 
   @Override
-  public boolean equals(Object obj){
-    return this == obj || (obj != null && getClass() == obj.getClass() && value().equals(((MaxChangeSet) obj).value()));
+  public boolean equals(Object obj) {
+    return this == obj
+        || (obj != null
+            && getClass() == obj.getClass()
+            && value().equals(((MaxChangeSet) obj).value()));
   }
 }

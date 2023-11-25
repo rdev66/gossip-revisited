@@ -30,8 +30,8 @@ import java.security.SecureRandom;
 
 public class KeyTool {
 
-  public static void generatePubandPrivateKeyFiles(String path, String id) 
-          throws NoSuchAlgorithmException, NoSuchProviderException, IOException{
+  public static void generatePubandPrivateKeyFiles(String path, String id)
+      throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
     SecureRandom r = new SecureRandom();
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
     keyGen.initialize(1024, r);
@@ -49,9 +49,9 @@ public class KeyTool {
       sigfos.close();
     }
   }
-  
-  public static void main (String [] args) throws 
-    NoSuchAlgorithmException, NoSuchProviderException, IOException{
+
+  public static void main(String[] args)
+      throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
     generatePubandPrivateKeyFiles(args[0], args[1]);
   }
 }

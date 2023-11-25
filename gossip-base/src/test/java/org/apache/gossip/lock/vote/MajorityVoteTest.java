@@ -19,14 +19,11 @@ package org.apache.gossip.lock.vote;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@RunWith(JUnitPlatform.class)
 public class MajorityVoteTest {
 
   @Test
@@ -45,7 +42,6 @@ public class MajorityVoteTest {
 
     Assert.assertTrue(result.value().get("1").getVotes().get("2").getVoteValue());
     Assert.assertTrue(!result.value().get("3").getVotes().get("4").getVoteValue());
-
   }
 
   @Test
@@ -64,7 +60,6 @@ public class MajorityVoteTest {
 
     Assert.assertTrue(result.value().get("1").getVotes().get("2").getVoteValue());
     Assert.assertTrue(!result.value().get("1").getVotes().get("4").getVoteValue());
-
   }
 
   @Test
@@ -75,8 +70,8 @@ public class MajorityVoteTest {
     MajorityVote first = new MajorityVote(voteCandidateMap1);
 
     Map<String, VoteCandidate> voteCandidateMap2 = new HashMap<>();
-    VoteCandidate candidateB = new VoteCandidate("1", "key1",
-            generateVotes(2, 4, true, false, true));
+    VoteCandidate candidateB =
+        new VoteCandidate("1", "key1", generateVotes(2, 4, true, false, true));
     voteCandidateMap2.put("1", candidateB);
     MajorityVote second = new MajorityVote(voteCandidateMap2);
 
@@ -92,10 +87,10 @@ public class MajorityVoteTest {
     }
     for (int i = startingNodeId; i <= endNodeId; i++) {
       String nodeId = i + "";
-      voteMap.put(nodeId, new Vote(nodeId, votes[i - startingNodeId], false, new ArrayList<>(),
-              new ArrayList<>()));
+      voteMap.put(
+          nodeId,
+          new Vote(nodeId, votes[i - startingNodeId], false, new ArrayList<>(), new ArrayList<>()));
     }
     return voteMap;
   }
-
 }

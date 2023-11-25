@@ -31,14 +31,14 @@ import org.junit.Before;
 
 public abstract class AbstractIntegrationBase {
 
-  List <GossipManager> nodes = new ArrayList<>();
-  
-  public void register(GossipManager manager){
+  List<GossipManager> nodes = new ArrayList<>();
+
+  public void register(GossipManager manager) {
     nodes.add(manager);
   }
 
   public void generateStandardNodes(final int memberCount) throws URISyntaxException {
-    if(nodes.size() > 0){
+    if (nodes.size() > 0) {
       after();
       nodes.clear();
     }
@@ -55,24 +55,30 @@ public abstract class AbstractIntegrationBase {
 
     for (int i = 1; i < memberCount + 1; ++i) {
       URI uri = new URI("udp://" + "127.0.0.1" + ":" + (50000 + i));
-      GossipManager gossipService = GossipManagerBuilder.newBuilder().cluster(cluster).uri(uri)
-              .id(i + "").gossipMembers(startupMembers).gossipSettings(settings).build();
+      GossipManager gossipService =
+          GossipManagerBuilder.newBuilder()
+              .cluster(cluster)
+              .uri(uri)
+              .id(i + "")
+              .gossipMembers(startupMembers)
+              .gossipSettings(settings)
+              .build();
       gossipService.init();
       register(gossipService);
     }
   }
+
   @Before
-  public void before(){
+  public void before() {
     nodes = new ArrayList<>();
   }
-  
+
   @After
-  public void after(){
-    for (GossipManager node: nodes){
-      if (node !=null){
+  public void after() {
+    for (GossipManager node : nodes) {
+      if (node != null) {
         node.shutdown();
       }
     }
   }
-  
 }

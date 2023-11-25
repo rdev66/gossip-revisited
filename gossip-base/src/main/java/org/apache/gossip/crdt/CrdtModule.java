@@ -23,6 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.lock.vote.MajorityVote;
 import org.apache.gossip.lock.vote.Vote;
@@ -30,11 +34,6 @@ import org.apache.gossip.lock.vote.VoteCandidate;
 import org.apache.gossip.replication.BlackListReplicable;
 import org.apache.gossip.replication.Replicable;
 import org.apache.gossip.replication.WhiteListReplicable;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 abstract class OrSetMixin<E> {
   @JsonCreator

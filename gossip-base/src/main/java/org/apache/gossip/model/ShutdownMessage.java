@@ -22,10 +22,8 @@ public class ShutdownMessage extends Message {
   public static final String PER_NODE_KEY = "gossipcore.shutdowmessage";
   private long shutdownAtNanos;
   private String nodeId;
-  
-  public ShutdownMessage(){
-    
-  }
+
+  public ShutdownMessage() {}
 
   public String getNodeId() {
     return nodeId;
@@ -47,5 +45,4 @@ public class ShutdownMessage extends Message {
   public String toString() {
     return "ShutdownMessage [shutdownAtNanos=" + shutdownAtNanos + ", nodeId=" + nodeId + "]";
   }
-  
 }

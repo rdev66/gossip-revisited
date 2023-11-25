@@ -20,15 +20,6 @@ package org.apache.gossip.lock;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import org.apache.gossip.Member;
-import org.apache.gossip.lock.exceptions.VoteFailedException;
-import org.apache.gossip.lock.vote.MajorityVote;
-import org.apache.gossip.lock.vote.Vote;
-import org.apache.gossip.lock.vote.VoteCandidate;
-import org.apache.gossip.manager.GossipManager;
-import org.apache.gossip.model.SharedDataMessage;
-import org.apache.log4j.Logger;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,19 +34,27 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.gossip.Member;
+import org.apache.gossip.lock.exceptions.VoteFailedException;
+import org.apache.gossip.lock.vote.MajorityVote;
+import org.apache.gossip.lock.vote.Vote;
+import org.apache.gossip.lock.vote.VoteCandidate;
+import org.apache.gossip.manager.GossipManager;
+import org.apache.gossip.model.SharedDataMessage;
 
+@Slf4j
 public class LockManager {
 
-  public static final Logger LOGGER = Logger.getLogger(LockManager.class);
 
+  // For MetricRegistry
+  public static final String LOCK_KEY_SET_SIZE = "gossip.lock.key_set_size";
+  public static final String LOCK_TIME = "gossip.lock.time";
   private final GossipManager gossipManager;
   private final LockManagerSettings lockSettings;
   private final ScheduledExecutorService voteService;
   private final AtomicInteger numberOfNodes;
   private final Set<String> lockKeys;
-  // For MetricRegistry
-  public static final String LOCK_KEY_SET_SIZE = "gossip.lock.key_set_size";
-  public static final String LOCK_TIME = "gossip.lock.time";
   private final Timer lockTimeMetric;
 
   public LockManager(GossipManager gossipManager, final LockManagerSettings lockManagerSettings,
@@ -95,20 +94,16 @@ public class LockManager {
 
       long passedCandidates = voteResultMap.values().stream().filter(aBoolean -> aBoolean).count();
       String myNodeId = gossipManager.getMyself().getId();
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("NodeId=" + myNodeId + ", VoteMap=" + voteResultMap + ", WinnerCount="
+        log.debug("NodeId=" + myNodeId + ", VoteMap=" + voteResultMap + ", WinnerCount="
                 + passedCandidates);
-      }
       // Check for possible dead lock when no candidates were won
       if (passedCandidates == 0) {
         if (isDeadLock(voteCandidatesMap)) {
           deadlockDetectCount++;
           // Testing for deadlock is not always correct, therefore test for continues deadlocks
           if (deadlockDetectCount >= lockSettings.getDeadlockDetectionThreshold()) {
-            if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("Deadlock detected from node " + myNodeId + ". VoteCandidatesMap="
+              log.debug("Deadlock detected from node " + myNodeId + ". VoteCandidatesMap="
                       + voteCandidatesMap);
-            }
             preventDeadLock(voteCandidatesMap);
           }
         } else {
@@ -251,9 +246,7 @@ public class LockManager {
         }
       }
     }
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Node " + myNodeId + " give up votes to node " + selectedCandidateId);
-    }
+      log.debug("Node " + myNodeId + " give up votes to node " + selectedCandidateId);
   }
 
   private String getVotedCandidateNodeId(String nodeId,

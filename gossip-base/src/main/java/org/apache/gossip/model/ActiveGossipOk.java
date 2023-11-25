@@ -17,6 +17,4 @@
  */
 package org.apache.gossip.model;
 
-public class ActiveGossipOk extends Response {
-
-}
+public class ActiveGossipOk extends Response {}

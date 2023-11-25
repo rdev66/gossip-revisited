@@ -17,11 +17,10 @@
  */
 package org.apache.gossip.crdt;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class GrowOnlyCounterTest {
   

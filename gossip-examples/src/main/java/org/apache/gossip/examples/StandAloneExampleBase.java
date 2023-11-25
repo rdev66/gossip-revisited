@@ -90,18 +90,20 @@ abstract class StandAloneExampleBase {
   }
 
   private void startMonitorLoop(GossipManager gossipService) {
-    new Thread(() -> {
-      while (true) {
-        optionallyClearTerminal();
-        printLiveMembers(gossipService);
-        printDeadMambers(gossipService);
-        printValues(gossipService);
-        try {
-          Thread.sleep(2000);
-        } catch (Exception ignore) {
-        }
-      }
-    }).start();
+    new Thread(
+            () -> {
+              while (true) {
+                optionallyClearTerminal();
+                printLiveMembers(gossipService);
+                printDeadMambers(gossipService);
+                printValues(gossipService);
+                try {
+                  Thread.sleep(2000);
+                } catch (Exception ignore) {
+                }
+              }
+            })
+        .start();
   }
 
   private void printLiveMembers(GossipManager gossipService) {
@@ -143,11 +145,16 @@ abstract class StandAloneExampleBase {
     GossipSettings s = new GossipSettings();
     s.setWindowSize(1000);
     s.setGossipInterval(100);
-    GossipManager gossipService = GossipManagerBuilder.newBuilder().cluster("mycluster")
-            .uri(URI.create(args[0])).id(args[1])
-            .gossipMembers(Collections
-                    .singletonList(new RemoteMember("mycluster", URI.create(args[2]), args[3])))
-            .gossipSettings(s).build();
+    GossipManager gossipService =
+        GossipManagerBuilder.newBuilder()
+            .cluster("mycluster")
+            .uri(URI.create(args[0]))
+            .id(args[1])
+            .gossipMembers(
+                Collections.singletonList(
+                    new RemoteMember("mycluster", URI.create(args[2]), args[3])))
+            .gossipSettings(s)
+            .build();
     setGossipService(gossipService);
   }
 
@@ -158,5 +165,4 @@ abstract class StandAloneExampleBase {
   GossipManager getGossipManager() {
     return this.gossipService;
   }
-
 }

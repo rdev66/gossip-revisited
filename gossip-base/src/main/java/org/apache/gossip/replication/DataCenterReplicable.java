@@ -28,19 +28,21 @@ import org.apache.gossip.model.Base;
  * @see Replicable
  */
 public class DataCenterReplicable<T extends Base> implements Replicable<T> {
-  
+
   @Override
   public boolean shouldReplicate(LocalMember me, LocalMember destination, T message) {
     if (!me.getProperties().containsKey(DatacenterRackAwareActiveGossiper.DATACENTER)) {
       // replicate to others if I am not belong to any data center
       return true;
-    } else if (!destination.getProperties()
-            .containsKey(DatacenterRackAwareActiveGossiper.DATACENTER)) {
+    } else if (!destination
+        .getProperties()
+        .containsKey(DatacenterRackAwareActiveGossiper.DATACENTER)) {
       // Do not replicate if the destination data center is not defined
       return false;
     } else {
-      return me.getProperties().get(DatacenterRackAwareActiveGossiper.DATACENTER)
-              .equals(destination.getProperties().get(DatacenterRackAwareActiveGossiper.DATACENTER));
+      return me.getProperties()
+          .get(DatacenterRackAwareActiveGossiper.DATACENTER)
+          .equals(destination.getProperties().get(DatacenterRackAwareActiveGossiper.DATACENTER));
     }
   }
 }

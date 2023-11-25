@@ -17,19 +17,18 @@
  */
 package org.apache.gossip.manager;
 
-import java.util.List;
+import com.codahale.metrics.MetricRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.LocalMember;
-
-import com.codahale.metrics.MetricRegistry;
 
 /**
  * Sends gossip traffic at different rates to other racks and data-centers.
@@ -38,18 +37,17 @@ import com.codahale.metrics.MetricRegistry;
  * in the rack than in the the datacenter. We can adjust the rate at which we send messages to each group.
  * 
  */
+@Slf4j
 public class DatacenterRackAwareActiveGossiper extends AbstractActiveGossiper {
 
   public static final String DATACENTER = "datacenter";
   public static final String RACK = "rack";
-  
+  private final BlockingQueue<Runnable> workQueue;
   private int sameRackGossipIntervalMs = 100;
   private int sameDcGossipIntervalMs = 500;
   private int differentDatacenterGossipIntervalMs = 1000;
   private int randomDeadMemberSendIntervalMs = 250;
-  
   private ScheduledExecutorService scheduledExecutorService;
-  private final BlockingQueue<Runnable> workQueue;
   private ThreadPoolExecutor threadService;
   
   public DatacenterRackAwareActiveGossiper(GossipManager gossipManager, GossipCore gossipCore,
@@ -220,14 +218,14 @@ public class DatacenterRackAwareActiveGossiper extends AbstractActiveGossiper {
     try {
       scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      LOGGER.debug("Issue during shutdown", e);
+      log.debug("Issue during shutdown", e);
     }
     sendShutdownMessage();
     threadService.shutdown();
     try {
       threadService.awaitTermination(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      LOGGER.debug("Issue during shutdown", e);
+      log.debug("Issue during shutdown", e);
     }
   }
   

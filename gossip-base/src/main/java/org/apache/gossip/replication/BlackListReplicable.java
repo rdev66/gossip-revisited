@@ -30,9 +30,9 @@ import java.util.List;
  * @see Replicable
  */
 public class BlackListReplicable<T extends Base> implements Replicable<T> {
-  
+
   private final List<LocalMember> blackListMembers;
-  
+
   public BlackListReplicable(List<LocalMember> blackListMembers) {
     if (blackListMembers == null) {
       this.blackListMembers = new ArrayList<>();

@@ -30,25 +30,76 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
 
   private static final String INDEX_KEY_FOR_COUNTER = "def";
 
+  StandAloneNodeCrdtOrSet(String[] args) {
+    args = super.checkArgsForClearFlag(args);
+    super.initGossipManager(args);
+  }
+
   public static void main(String[] args) throws InterruptedException, IOException {
     StandAloneNodeCrdtOrSet example = new StandAloneNodeCrdtOrSet(args);
     boolean willRead = true;
     example.exec(willRead);
   }
 
-  StandAloneNodeCrdtOrSet(String[] args) {
-    args = super.checkArgsForClearFlag(args);
-    super.initGossipManager(args);
+  private static void listen(String val, GossipManager gossipManager) {
+    gossipManager.registerSharedDataSubscriber(
+        (key, oldValue, newValue) -> {
+          if (key.equals(val)) {
+            System.out.println(
+                "Event Handler fired for key = '" + key + "'! " + oldValue + " " + newValue);
+          }
+        });
+  }
+
+  private static void gcount(String val, GossipManager gossipManager) {
+    GrowOnlyCounter c = (GrowOnlyCounter) gossipManager.findCrdt(INDEX_KEY_FOR_COUNTER);
+    Long l = Long.valueOf(val);
+    if (c == null) {
+      c = new GrowOnlyCounter(new GrowOnlyCounter.Builder(gossipManager).increment((l)));
+    } else {
+      c = new GrowOnlyCounter(c, new GrowOnlyCounter.Builder(gossipManager).increment((l)));
+    }
+    SharedDataMessage m = new SharedDataMessage();
+    m.setExpireAt(Long.MAX_VALUE);
+    m.setKey(INDEX_KEY_FOR_COUNTER);
+    m.setPayload(c);
+    m.setTimestamp(System.currentTimeMillis());
+    gossipManager.merge(m);
+  }
+
+  private static void removeData(String val, GossipManager gossipService) {
+    @SuppressWarnings("unchecked")
+    OrSet<String> s = (OrSet<String>) gossipService.findCrdt(INDEX_KEY_FOR_SET);
+    SharedDataMessage m = new SharedDataMessage();
+    m.setExpireAt(Long.MAX_VALUE);
+    m.setKey(INDEX_KEY_FOR_SET);
+    m.setPayload(new OrSet<String>(s, new OrSet.Builder<String>().remove(val)));
+    m.setTimestamp(System.currentTimeMillis());
+    gossipService.merge(m);
+  }
+
+  private static void addData(String val, GossipManager gossipService) {
+    SharedDataMessage m = new SharedDataMessage();
+    m.setExpireAt(Long.MAX_VALUE);
+    m.setKey(INDEX_KEY_FOR_SET);
+    m.setPayload(new OrSet<String>(val));
+    m.setTimestamp(System.currentTimeMillis());
+    gossipService.merge(m);
   }
 
   void printValues(GossipManager gossipService) {
     System.out.println("Last Input: " + getLastInput());
-    System.out.println("---------- Or Set " + (gossipService.findCrdt(INDEX_KEY_FOR_SET) == null
-            ? "" : gossipService.findCrdt(INDEX_KEY_FOR_SET).value()));
+    System.out.println(
+        "---------- Or Set "
+            + (gossipService.findCrdt(INDEX_KEY_FOR_SET) == null
+                ? ""
+                : gossipService.findCrdt(INDEX_KEY_FOR_SET).value()));
     System.out.println("********** " + gossipService.findCrdt(INDEX_KEY_FOR_SET));
     System.out.println(
-            "^^^^^^^^^^ Grow Only Counter" + (gossipService.findCrdt(INDEX_KEY_FOR_COUNTER) == null
-                    ? "" : gossipService.findCrdt(INDEX_KEY_FOR_COUNTER).value()));
+        "^^^^^^^^^^ Grow Only Counter"
+            + (gossipService.findCrdt(INDEX_KEY_FOR_COUNTER) == null
+                ? ""
+                : gossipService.findCrdt(INDEX_KEY_FOR_COUNTER).value()));
     System.out.println("$$$$$$$$$$ " + gossipService.findCrdt(INDEX_KEY_FOR_COUNTER));
   }
 
@@ -88,50 +139,4 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
     }
     return (l >= 0);
   }
-
-  private static void listen(String val, GossipManager gossipManager) {
-    gossipManager.registerSharedDataSubscriber((key, oldValue, newValue) -> {
-      if (key.equals(val)) {
-        System.out.println(
-                "Event Handler fired for key = '" + key + "'! " + oldValue + " " + newValue);
-      }
-    });
-  }
-
-  private static void gcount(String val, GossipManager gossipManager) {
-    GrowOnlyCounter c = (GrowOnlyCounter) gossipManager.findCrdt(INDEX_KEY_FOR_COUNTER);
-    Long l = Long.valueOf(val);
-    if (c == null) {
-      c = new GrowOnlyCounter(new GrowOnlyCounter.Builder(gossipManager).increment((l)));
-    } else {
-      c = new GrowOnlyCounter(c, new GrowOnlyCounter.Builder(gossipManager).increment((l)));
-    }
-    SharedDataMessage m = new SharedDataMessage();
-    m.setExpireAt(Long.MAX_VALUE);
-    m.setKey(INDEX_KEY_FOR_COUNTER);
-    m.setPayload(c);
-    m.setTimestamp(System.currentTimeMillis());
-    gossipManager.merge(m);
-  }
-
-  private static void removeData(String val, GossipManager gossipService) {
-    @SuppressWarnings("unchecked")
-    OrSet<String> s = (OrSet<String>) gossipService.findCrdt(INDEX_KEY_FOR_SET);
-    SharedDataMessage m = new SharedDataMessage();
-    m.setExpireAt(Long.MAX_VALUE);
-    m.setKey(INDEX_KEY_FOR_SET);
-    m.setPayload(new OrSet<String>(s, new OrSet.Builder<String>().remove(val)));
-    m.setTimestamp(System.currentTimeMillis());
-    gossipService.merge(m);
-  }
-
-  private static void addData(String val, GossipManager gossipService) {
-    SharedDataMessage m = new SharedDataMessage();
-    m.setExpireAt(Long.MAX_VALUE);
-    m.setKey(INDEX_KEY_FOR_SET);
-    m.setPayload(new OrSet<String>(val));
-    m.setTimestamp(System.currentTimeMillis());
-    gossipService.merge(m);
-  }
-
 }

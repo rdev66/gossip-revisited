@@ -25,21 +25,24 @@ import org.apache.gossip.model.SharedDataMessage;
 
 public class StandAlonePNCounter extends StandAloneExampleBase {
 
+  StandAlonePNCounter(String[] args) {
+    args = super.checkArgsForClearFlag(args);
+    super.initGossipManager(args);
+  }
+
   public static void main(String[] args) throws InterruptedException, IOException {
     StandAlonePNCounter example = new StandAlonePNCounter(args);
     boolean willRead = true;
     example.exec(willRead);
   }
 
-  StandAlonePNCounter(String[] args) {
-    args = super.checkArgsForClearFlag(args);
-    super.initGossipManager(args);
-  }
-
   void printValues(GossipManager gossipService) {
     System.out.println("Last Input: " + getLastInput());
-    System.out.println("---------- " + (gossipService.findCrdt("myPNCounter") == null ? ""
-            : gossipService.findCrdt("myPNCounter").value()));
+    System.out.println(
+        "---------- "
+            + (gossipService.findCrdt("myPNCounter") == null
+                ? ""
+                : gossipService.findCrdt("myPNCounter").value()));
     System.out.println("********** " + gossipService.findCrdt("myPNCounter"));
   }
 
@@ -94,5 +97,4 @@ public class StandAlonePNCounter extends StandAloneExampleBase {
     m.setTimestamp(System.currentTimeMillis());
     gossipManager.merge(m);
   }
-
 }

@@ -18,22 +18,21 @@
 
 package org.apache.gossip.manager;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import java.util.function.BiFunction;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.GossipSettings;
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.event.GossipListener;
 import org.apache.gossip.event.GossipState;
 import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.ShutdownMessage;
-import org.apache.log4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
-import java.util.function.BiFunction;
-
+@Slf4j
 public class GossipMemberStateRefresher {
-  public static final Logger LOGGER = Logger.getLogger(GossipMemberStateRefresher.class);
 
   private final Map<LocalMember, GossipState> members;
   private final GossipSettings settings;
@@ -66,7 +65,7 @@ public class GossipMemberStateRefresher {
     try {
       runOnce();
     } catch (RuntimeException ex) {
-      LOGGER.warn("scheduled state had exception", ex);
+      log.warn("scheduled state had exception", ex);
     }
   }
 
@@ -144,13 +143,13 @@ public class GossipMemberStateRefresher {
     try {
       scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      LOGGER.debug("Issue during shutdown", e);
+      log.debug("Issue during shutdown", e);
     }
     listenerExecutor.shutdown();
     try {
       listenerExecutor.awaitTermination(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      LOGGER.debug("Issue during shutdown", e);
+      log.debug("Issue during shutdown", e);
     }
     listenerExecutor.shutdownNow();
   }

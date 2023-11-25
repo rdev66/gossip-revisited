@@ -32,15 +32,15 @@ import org.apache.gossip.manager.GossipManagerBuilder;
 
 public class StandAloneDatacenterAndRack extends StandAloneExampleBase {
 
+  StandAloneDatacenterAndRack(String[] args) {
+    args = super.checkArgsForClearFlag(args);
+    initGossipManager(args);
+  }
+
   public static void main(String[] args) throws InterruptedException, IOException {
     StandAloneDatacenterAndRack example = new StandAloneDatacenterAndRack(args);
     boolean willRead = true;
     example.exec(willRead);
-  }
-
-  StandAloneDatacenterAndRack(String[] args) {
-    args = super.checkArgsForClearFlag(args);
-    initGossipManager(args);
   }
 
   void initGossipManager(String[] args) {
@@ -55,11 +55,16 @@ public class StandAloneDatacenterAndRack extends StandAloneExampleBase {
     Map<String, String> props = new HashMap<>();
     props.put(DatacenterRackAwareActiveGossiper.DATACENTER, args[4]);
     props.put(DatacenterRackAwareActiveGossiper.RACK, args[5]);
-    GossipManager manager = GossipManagerBuilder.newBuilder().cluster("mycluster")
-            .uri(URI.create(args[0])).id(args[1]).gossipSettings(s)
+    GossipManager manager =
+        GossipManagerBuilder.newBuilder()
+            .cluster("mycluster")
+            .uri(URI.create(args[0]))
+            .id(args[1])
+            .gossipSettings(s)
             .gossipMembers(
-                    Arrays.asList(new RemoteMember("mycluster", URI.create(args[2]), args[3])))
-            .properties(props).build();
+                Arrays.asList(new RemoteMember("mycluster", URI.create(args[2]), args[3])))
+            .properties(props)
+            .build();
     manager.init();
     setGossipService(manager);
   }
@@ -68,5 +73,4 @@ public class StandAloneDatacenterAndRack extends StandAloneExampleBase {
   void printValues(GossipManager gossipService) {
     return;
   }
-
 }

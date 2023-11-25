@@ -21,14 +21,15 @@ import org.apache.gossip.LocalMember;
 import org.apache.gossip.model.Base;
 
 /**
- * This interface is used to determine whether a data item needs to be replicated to
- * another gossip member.
+ * This interface is used to determine whether a data item needs to be replicated to another gossip
+ * member.
  *
  * @param <T> A subtype of the class {@link org.apache.gossip.model.Base} which uses this interface
  */
 public interface Replicable<T extends Base> {
   /**
    * Test for a given data item needs to be replicated.
+   *
    * @param me node that the data item is going to transmit from.
    * @param destination target node to replicate.
    * @param message this parameter is currently ignored

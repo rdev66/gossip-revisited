@@ -21,13 +21,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Map;
 
-/**
- * An abstract class representing a gossip member.
- * 
- */
+/** An abstract class representing a gossip member. */
 public abstract class Member implements Comparable<Member> {
 
-  
   protected URI uri;
 
   protected volatile long heartbeat;
@@ -42,21 +38,18 @@ public abstract class Member implements Comparable<Member> {
   protected String id;
 
   /* properties provided at startup time */
-  protected Map<String,String> properties;
-  
+  protected Map<String, String> properties;
+
   /**
    * Constructor.
    *
-   * @param clusterName
-   *          The name of the cluster 
-   * @param uri
-   *          A URI object containing IP/hostname and port
-   * @param heartbeat
-   *          The current heartbeat
-   * @param id
-   *          An id that may be replaced after contact
+   * @param clusterName The name of the cluster
+   * @param uri A URI object containing IP/hostname and port
+   * @param heartbeat The current heartbeat
+   * @param id An id that may be replaced after contact
    */
-  public Member(String clusterName, URI uri, String id, long heartbeat, Map<String,String> properties) {
+  public Member(
+      String clusterName, URI uri, String id, long heartbeat, Map<String, String> properties) {
     this.clusterName = clusterName;
     this.id = id;
     this.heartbeat = heartbeat;
@@ -64,20 +57,20 @@ public abstract class Member implements Comparable<Member> {
     this.properties = properties;
   }
 
-  protected Member(){}
+  protected Member() {}
+
   /**
    * Get the name of the cluster the member belongs to.
-   * 
+   *
    * @return The cluster name
    */
   public String getClusterName() {
     return clusterName;
   }
 
- 
   /**
-   * @return The member address in the form IP/host:port Similar to the toString in
-   * {@link InetSocketAddress}
+   * @return The member address in the form IP/host:port Similar to the toString in {@link
+   *     InetSocketAddress}
    */
   public String computeAddress() {
     return uri.getHost() + ":" + uri.getPort();
@@ -85,7 +78,7 @@ public abstract class Member implements Comparable<Member> {
 
   /**
    * Get the heartbeat of this gossip member.
-   * 
+   *
    * @return The current heartbeat.
    */
   public long getHeartbeat() {
@@ -94,9 +87,8 @@ public abstract class Member implements Comparable<Member> {
 
   /**
    * Set the heartbeat of this gossip member.
-   * 
-   * @param heartbeat
-   *          The new heartbeat.
+   *
+   * @param heartbeat The new heartbeat.
    */
   public void setHeartbeat(long heartbeat) {
     this.heartbeat = heartbeat;
@@ -130,8 +122,10 @@ public abstract class Member implements Comparable<Member> {
     final int prime = 31;
     int result = 1;
     String address = computeAddress();
-    result = prime * result + ((address == null) ? 0 : address.hashCode()) + (clusterName == null ? 0
-            : clusterName.hashCode());
+    result =
+        prime * result
+            + ((address == null) ? 0 : address.hashCode())
+            + (clusterName == null ? 0 : clusterName.hashCode());
     return result;
   }
 
@@ -157,7 +151,7 @@ public abstract class Member implements Comparable<Member> {
     }
     // The object is the same of they both have the same address (hostname and port).
     return computeAddress().equals(((LocalMember) obj).computeAddress())
-            && getClusterName().equals(((LocalMember) obj).getClusterName());
+        && getClusterName().equals(((LocalMember) obj).getClusterName());
   }
 
   public int compareTo(Member other) {

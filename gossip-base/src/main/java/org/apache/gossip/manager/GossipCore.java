@@ -20,6 +20,13 @@ package org.apache.gossip.manager;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.Member;
 import org.apache.gossip.RemoteMember;
@@ -33,35 +40,20 @@ import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.Response;
 import org.apache.gossip.model.SharedDataMessage;
 import org.apache.gossip.udp.Trackable;
-import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
-
+@Slf4j
 public class GossipCore implements GossipCoreConstants {
 
-  class LatchAndBase {
-    private final CountDownLatch latch;
-    private volatile Base base;
-    
-    LatchAndBase(){
-      latch = new CountDownLatch(1);
-    }
-    
-  }
-  public static final Logger LOGGER = Logger.getLogger(GossipCore.class);
   private final GossipManager gossipManager;
-  private ConcurrentHashMap<String, LatchAndBase> requests;
+  @Getter
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>> perNodeData;
+  @Getter
   private final ConcurrentHashMap<String, SharedDataMessage> sharedData;
   private final Meter messageSerdeException;
   private final Meter transmissionException;
   private final Meter transmissionSuccess;
   private final DataEventManager eventManager;
-  
+  private ConcurrentHashMap<String, LatchAndBase> requests;
   public GossipCore(GossipManager manager, MetricRegistry metrics){
     this.gossipManager = manager;
     requests = new ConcurrentHashMap<>();
@@ -75,7 +67,7 @@ public class GossipCore implements GossipCoreConstants {
     transmissionException = metrics.meter(MESSAGE_TRANSMISSION_EXCEPTION);
     transmissionSuccess = metrics.meter(MESSAGE_TRANSMISSION_SUCCESS);
   }
-
+  
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public void addSharedData(SharedDataMessage message) {
     while (true){
@@ -135,20 +127,12 @@ public class GossipCore implements GossipCoreConstants {
     }
   }
 
-  public ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>> getPerNodeData(){
-    return perNodeData;
-  }
-
-  public ConcurrentHashMap<String, SharedDataMessage> getSharedData() {
-    return sharedData;
-  }
-
   public void shutdown(){
   }
 
   public void receive(Base base) {
     if (!gossipManager.getMessageHandler().invoke(this, gossipManager, base)) {
-      LOGGER.warn("received message can not be handled");
+      log.warn("received message can not be handled");
     }
   }
 
@@ -177,10 +161,8 @@ public class GossipCore implements GossipCoreConstants {
   }
 
   public Response send(Base message, URI uri){
-    if (LOGGER.isDebugEnabled()){
-      LOGGER.debug("Sending " + message);
-      LOGGER.debug("Current request queue " + requests);
-    }
+      log.debug("Sending " + message);
+      log.debug("Current request queue " + requests);
 
     final Trackable t;
     LatchAndBase latchAndBase = null;
@@ -195,7 +177,7 @@ public class GossipCore implements GossipCoreConstants {
     if (latchAndBase == null){
       return null;
     }
-    
+
     try {
       boolean complete = latchAndBase.latch.await(1, TimeUnit.SECONDS);
       if (complete){
@@ -206,9 +188,7 @@ public class GossipCore implements GossipCoreConstants {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     } finally {
-      if (latchAndBase != null){
         requests.remove(t.getUuid() + "/" + t.getUriFrom());
-      }
     }
   }
 
@@ -222,7 +202,7 @@ public class GossipCore implements GossipCoreConstants {
     try {
       sendInternal(message, u);
     } catch (RuntimeException ex) {
-      LOGGER.debug("Send one way failed", ex);
+      log.debug("Send one way failed", ex);
     }
   }
 
@@ -240,12 +220,12 @@ public class GossipCore implements GossipCoreConstants {
    *
    */
   public void mergeLists(RemoteMember senderMember, List<Member> remoteList) {
-    if (LOGGER.isDebugEnabled()){
+    if (log.isDebugEnabled()){
       debugState(senderMember, remoteList);
     }
     for (LocalMember i : gossipManager.getDeadMembers()) {
       if (i.getId().equals(senderMember.getId())) {
-        LOGGER.debug(gossipManager.getMyself() + " contacted by dead member " + senderMember.getUri());
+        log.debug(gossipManager.getMyself() + " contacted by dead member " + senderMember.getUri());
         i.recordHeartbeat(senderMember.getHeartbeat());
         i.setHeartbeat(senderMember.getHeartbeat());
         //TODO consider forcing an UP here
@@ -275,14 +255,14 @@ public class GossipCore implements GossipCoreConstants {
         }
       }
     }
-    if (LOGGER.isDebugEnabled()){
+    if (log.isDebugEnabled()){
       debugState(senderMember, remoteList);
     }
   }
 
   private void debugState(RemoteMember senderMember,
           List<Member> remoteList){
-    LOGGER.warn(
+    log.warn(
           "-----------------------\n" +
           "Me " + gossipManager.getMyself() + "\n" +
           "Sender " + senderMember + "\n" +
@@ -313,7 +293,7 @@ public class GossipCore implements GossipCoreConstants {
       }
     }
   }
-  
+
   void registerPerNodeDataSubscriber(UpdateNodeDataEventHandler handler){
     eventManager.registerPerNodeDataSubscriber(handler);
   }
@@ -328,5 +308,15 @@ public class GossipCore implements GossipCoreConstants {
   
   void unregisterSharedDataSubscriber(UpdateSharedDataEventHandler handler){
     eventManager.unregisterSharedDataSubscriber(handler);
+  }
+  
+  class LatchAndBase {
+    private final CountDownLatch latch;
+    private volatile Base base;
+
+    LatchAndBase(){
+      latch = new CountDownLatch(1);
+    }
+
   }
 }

@@ -20,7 +20,6 @@ package org.apache.gossip.crdt;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
-
 import org.apache.gossip.crdt.OrSet.Builder.Operation;
 
 /*
@@ -83,6 +82,21 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
     val = computeValue();
   }
 
+  public OrSet(OrSet<E> left, OrSet<E> right){
+    BiConsumer<Map<E, Set<UUID>>, Map<E, Set<UUID>>> internalMerge = (items, other) -> {
+      for (Entry<E, Set<UUID>> l : other.entrySet()){
+        internalSetMerge(items, l.getKey(), l.getValue());
+      }
+    };
+
+    internalMerge.accept(elements, left.elements);
+    internalMerge.accept(elements, right.elements);
+    internalMerge.accept(tombstones, left.tombstones);
+    internalMerge.accept(tombstones, right.tombstones);
+
+    val = computeValue();
+  }
+
   static Set<UUID> mergeSets(Set<UUID> a, Set<UUID> b) {
     if ((a == null || a.isEmpty()) && (b == null || b.isEmpty())) {
       return null;
@@ -97,21 +111,6 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
       return;
     }
     map.merge(key, value, OrSet::mergeSets);
-  }
-
-  public OrSet(OrSet<E> left, OrSet<E> right){
-    BiConsumer<Map<E, Set<UUID>>, Map<E, Set<UUID>>> internalMerge = (items, other) -> {
-      for (Entry<E, Set<UUID>> l : other.entrySet()){
-        internalSetMerge(items, l.getKey(), l.getValue());
-      }
-    };
-
-    internalMerge.accept(elements, left.elements);
-    internalMerge.accept(elements, right.elements);
-    internalMerge.accept(tombstones, left.tombstones);
-    internalMerge.accept(tombstones, right.tombstones);
-
-    val = computeValue();
   }
 
   public OrSet<E> add(E e) {
@@ -166,55 +165,18 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
     return this;
   }
   
-  public static class Builder<E> {
-    public static enum Operation {
-      ADD, REMOVE
-    };
-
-    private class OrSetElement<EL> {
-      EL element;
-      Operation operation;
-
-      private OrSetElement(EL element, Operation operation) {
-        this.element = element;
-        this.operation = operation;
-      }
-    }
-
-    private List<OrSetElement<E>> elements = new ArrayList<>();
-
-    public Builder<E> add(E element) {
-      elements.add(new OrSetElement<E>(element, Operation.ADD));
-      return this;
-    }
-
-    public Builder<E> remove(E element) {
-      elements.add(new OrSetElement<E>(element, Operation.REMOVE));
-      return this;
-    }
-
-    public Builder<E> mutate(E element, Operation operation) {
-      elements.add(new OrSetElement<E>(element, operation));
-      return this;
-    }
-  }
-
-  
   public int size() {
     return value().size();
   }
 
-  
   public boolean isEmpty() {
     return value().size() == 0;
   }
 
-  
   public boolean contains(Object o) {
     return value().contains(o);
   }
 
-  
   public Iterator<E> iterator() {
     Iterator<E> managed = value().iterator();
     return new Iterator<E>() {
@@ -233,7 +195,7 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
       public E next() {
         return managed.next();
       }
-      
+
     };
   }
 
@@ -302,6 +264,39 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
 
   Map<E, Set<UUID>> getTombstones() {
     return tombstones;
+  }
+
+  public static class Builder<E> {
+        private List<OrSetElement<E>> elements = new ArrayList<>();;
+
+    public Builder<E> add(E element) {
+      elements.add(new OrSetElement<E>(element, Operation.ADD));
+      return this;
+    }
+
+    public Builder<E> remove(E element) {
+      elements.add(new OrSetElement<E>(element, Operation.REMOVE));
+      return this;
+    }
+
+    public Builder<E> mutate(E element, Operation operation) {
+      elements.add(new OrSetElement<E>(element, operation));
+      return this;
+    }
+
+public static enum Operation {
+      ADD, REMOVE
+    }
+
+    private class OrSetElement<EL> {
+      EL element;
+      Operation operation;
+
+      private OrSetElement(EL element, Operation operation) {
+        this.element = element;
+        this.operation = operation;
+      }
+    }
   }
 
 }

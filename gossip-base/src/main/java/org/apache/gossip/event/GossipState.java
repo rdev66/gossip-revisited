@@ -18,7 +18,9 @@
 package org.apache.gossip.event;
 
 public enum GossipState {
-  UP("up"), DOWN("down");
+  UP("up"),
+  DOWN("down");
+
   @SuppressWarnings("unused")
   private final String state;
 

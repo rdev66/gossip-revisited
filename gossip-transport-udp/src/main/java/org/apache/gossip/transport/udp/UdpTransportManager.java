@@ -17,11 +17,11 @@
  */
 package org.apache.gossip.transport.udp;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.manager.GossipCore;
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.model.Base;
 import org.apache.gossip.transport.AbstractTransportManager;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -34,32 +34,33 @@ import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This class is constructed by reflection in GossipManager.
- * It manages transport (byte read/write) operations over UDP.
+ * This class is constructed by reflection in GossipManager. It manages transport (byte read/write)
+ * operations over UDP.
  */
+@Slf4j
 public class UdpTransportManager extends AbstractTransportManager implements Runnable {
-  
-  public static final Logger LOGGER = Logger.getLogger(UdpTransportManager.class);
-  
+
   /** The socket used for the passive thread of the gossip service. */
   private final DatagramSocket server;
-  
+
   private final int soTimeout;
-  
+
   private final Thread me;
-  
+
   private final AtomicBoolean keepRunning = new AtomicBoolean(true);
-  
+
   /** required for reflection to work! */
   public UdpTransportManager(GossipManager gossipManager, GossipCore gossipCore) {
     super(gossipManager, gossipCore);
     soTimeout = gossipManager.getSettings().getGossipInterval() * 2;
     try {
-      SocketAddress socketAddress = new InetSocketAddress(gossipManager.getMyself().getUri().getHost(),
+      SocketAddress socketAddress =
+          new InetSocketAddress(
+              gossipManager.getMyself().getUri().getHost(),
               gossipManager.getMyself().getUri().getPort());
       server = new DatagramSocket(socketAddress);
     } catch (SocketException ex) {
-      LOGGER.warn(ex);
+      log.warn("Warn!", ex);
       throw new RuntimeException(ex);
     }
     me = new Thread(this);
@@ -73,21 +74,21 @@ public class UdpTransportManager extends AbstractTransportManager implements Run
         try {
           Base message = gossipManager.getProtocolManager().read(buf);
           gossipCore.receive(message);
-          //TODO this is suspect
+          // TODO this is suspect
           gossipManager.getMemberStateRefresher().run();
-        } catch (RuntimeException ex) {//TODO trap json exception
-          LOGGER.error("Unable to process message", ex);
+        } catch (RuntimeException ex) { // TODO trap json exception
+          log.error("Unable to process message", ex);
         }
       } catch (IOException e) {
         // InterruptedException are completely normal here because of the blocking lifecycle.
         if (!(e.getCause() instanceof InterruptedException)) {
-          LOGGER.error(e);
+          log.error("Error", e);
         }
         keepRunning.set(false);
       }
     }
   }
-  
+
   @Override
   public void shutdown() {
     keepRunning.set(false);
@@ -98,6 +99,7 @@ public class UdpTransportManager extends AbstractTransportManager implements Run
 
   /**
    * blocking read a message.
+   *
    * @return buffer of message contents.
    * @throws IOException
    */
@@ -111,25 +113,22 @@ public class UdpTransportManager extends AbstractTransportManager implements Run
 
   @Override
   public void send(URI endpoint, byte[] buf) throws IOException {
-    // todo: investigate UDP socket reuse. It would save a little setup/teardown time wrt to the local socket.
-    try (DatagramSocket socket = new DatagramSocket()){
+    // todo: investigate UDP socket reuse. It would save a little setup/teardown time wrt to the
+    // local socket.
+    try (DatagramSocket socket = new DatagramSocket()) {
       socket.setSoTimeout(soTimeout);
       InetAddress dest = InetAddress.getByName(endpoint.getHost());
       DatagramPacket payload = new DatagramPacket(buf, buf.length, dest, endpoint.getPort());
       socket.send(payload);
     }
   }
-  
+
   private void debug(byte[] jsonBytes) {
-    if (LOGGER.isDebugEnabled()){
-      String receivedMessage = new String(jsonBytes);
-      LOGGER.debug("Received message ( bytes): " + receivedMessage);
-    }
+    log.debug("Received message ( bytes): {}", jsonBytes);
   }
 
   @Override
   public void startEndpoint() {
     me.start();
   }
-  
 }

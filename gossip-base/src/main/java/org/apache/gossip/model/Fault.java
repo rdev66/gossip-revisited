@@ -21,7 +21,7 @@ public abstract class Fault extends Response {
 
   private String exception;
 
-  public Fault(){}
+  public Fault() {}
 
   public String getException() {
     return exception;
@@ -35,6 +35,4 @@ public abstract class Fault extends Response {
   public String toString() {
     return "Fault [exception=" + exception + "]";
   }
-
 }
-

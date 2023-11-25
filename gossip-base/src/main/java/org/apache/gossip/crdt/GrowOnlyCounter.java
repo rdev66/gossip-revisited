@@ -18,10 +18,9 @@
 
 package org.apache.gossip.crdt;
 
-import org.apache.gossip.manager.GossipManager;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.gossip.manager.GossipManager;
 
 public class GrowOnlyCounter implements CrdtCounter<Long, GrowOnlyCounter> {
   

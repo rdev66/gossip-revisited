@@ -17,6 +17,4 @@
  */
 package org.apache.gossip.model;
 
-public class Message extends Base {
-
-}
+public class Message extends Base {}

@@ -46,7 +46,7 @@ public class GossipManagerBuilder {
     private List<Member> gossipMembers;
     private GossipListener listener;
     private MetricRegistry registry;
-    private Map<String,String> properties;
+    private Map<String, String> properties;
     private MessageHandler messageHandler;
 
     private ManagerBuilder() {}
@@ -61,8 +61,8 @@ public class GossipManagerBuilder {
       this.cluster = cluster;
       return this;
     }
-    
-    public ManagerBuilder properties(Map<String,String> properties) {
+
+    public ManagerBuilder properties(Map<String, String> properties) {
       this.properties = properties;
       return this;
     }
@@ -76,7 +76,7 @@ public class GossipManagerBuilder {
       this.settings = settings;
       return this;
     }
-    
+
     public ManagerBuilder startupSettings(StartupSettings startupSettings) {
       this.cluster = startupSettings.getCluster();
       this.id = startupSettings.getId();
@@ -95,13 +95,13 @@ public class GossipManagerBuilder {
       this.listener = listener;
       return this;
     }
-    
+
     public ManagerBuilder registry(MetricRegistry registry) {
       this.registry = registry;
       return this;
     }
 
-    public ManagerBuilder uri(URI uri){
+    public ManagerBuilder uri(URI uri) {
       this.uri = uri;
       return this;
     }
@@ -116,24 +116,32 @@ public class GossipManagerBuilder {
       checkArgument(cluster != null, "You must specify a cluster name");
       checkArgument(settings != null, "You must specify gossip settings");
       checkArgument(uri != null, "You must specify a uri");
-      if (registry == null){
+      if (registry == null) {
         registry = new MetricRegistry();
       }
-      if (properties == null){
-        properties = new HashMap<String,String>();
+      if (properties == null) {
+        properties = new HashMap<String, String>();
       }
-      if (listener == null){
-        listener((a,b) -> {});
+      if (listener == null) {
+        listener((a, b) -> {});
       }
       if (gossipMembers == null) {
         gossipMembers = new ArrayList<>();
       }
-      
+
       if (messageHandler == null) {
         messageHandler = MessageHandlerFactory.defaultHandler();
       }
-      return new GossipManager(cluster, uri, id, properties, settings, gossipMembers, listener, registry, messageHandler) {} ;
+      return new GossipManager(
+          cluster,
+          uri,
+          id,
+          properties,
+          settings,
+          gossipMembers,
+          listener,
+          registry,
+          messageHandler) {};
     }
   }
-
 }
