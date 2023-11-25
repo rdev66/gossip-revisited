@@ -19,9 +19,7 @@ package org.apache.gossip.lock.vote;
 
 import java.util.List;
 
-/**
- * Store a voter details.
- */
+/** Store a voter details. */
 public class Vote {
   private final String votingNode;
   private final Boolean voteValue; // TODO: 7/16/17  weight?
@@ -29,8 +27,12 @@ public class Vote {
   private final List<String> deadMembers;
   private Boolean voteExchange;
 
-  public Vote(String votingNode, Boolean voteValue, Boolean voteExchange, List<String> liveMembers,
-          List<String> deadMembers) {
+  public Vote(
+      String votingNode,
+      Boolean voteValue,
+      Boolean voteExchange,
+      List<String> liveMembers,
+      List<String> deadMembers) {
     this.votingNode = votingNode;
     this.voteValue = voteValue;
     this.voteExchange = voteExchange;
@@ -64,7 +66,13 @@ public class Vote {
 
   @Override
   public String toString() {
-    return "votingNode=" + votingNode + ", voteValue=" + voteValue + ", liveMembers=" + liveMembers
-            + ", deadMembers= " + deadMembers;
+    return "votingNode="
+        + votingNode
+        + ", voteValue="
+        + voteValue
+        + ", liveMembers="
+        + liveMembers
+        + ", deadMembers= "
+        + deadMembers;
   }
 }

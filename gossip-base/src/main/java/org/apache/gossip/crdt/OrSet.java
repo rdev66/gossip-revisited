@@ -23,57 +23,39 @@ import java.util.function.BiConsumer;
 import org.apache.gossip.crdt.OrSet.Builder.Operation;
 
 /*
- * A immutable set 
+ * A immutable set
  */
-public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
-  
+public class OrSet<E> implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
+
   private final Map<E, Set<UUID>> elements = new HashMap<>();
   private final Map<E, Set<UUID>> tombstones = new HashMap<>();
   private final transient Set<E> val;
-  
-  public OrSet(){
+
+  public OrSet() {
     val = computeValue();
   }
-  
-  OrSet(Map<E, Set<UUID>> elements, Map<E, Set<UUID>> tombstones){
+
+  OrSet(Map<E, Set<UUID>> elements, Map<E, Set<UUID>> tombstones) {
     this.elements.putAll(elements);
     this.tombstones.putAll(tombstones);
     val = computeValue();
   }
-  
+
   @SafeVarargs
-  public OrSet(E ... elements){
+  public OrSet(E... elements) {
     this(new HashSet<>(Arrays.asList(elements)));
   }
 
   public OrSet(Set<E> elements) {
-    for (E e: elements){
+    for (E e : elements) {
       internalAdd(e);
     }
     val = computeValue();
   }
-  
-  public OrSet(Builder<E>builder){
-    for (Builder<E>.OrSetElement<E> e: builder.elements){
-      if (e.operation == Operation.ADD){
-        internalAdd(e.element);
-      } else {
-        internalRemove(e.element);
-      }
-    }
-    val = computeValue();
-  }
-  
-  /**
-   * This constructor is the way to remove elements from an existing set
-   * @param set
-   * @param builder 
-   */
-  public OrSet(OrSet<E> set, Builder<E> builder){
-    elements.putAll(set.elements);
-    tombstones.putAll(set.tombstones);
-    for (Builder<E>.OrSetElement<E> e: builder.elements){
-      if (e.operation == Operation.ADD){
+
+  public OrSet(Builder<E> builder) {
+    for (Builder<E>.OrSetElement<E> e : builder.elements) {
+      if (e.operation == Operation.ADD) {
         internalAdd(e.element);
       } else {
         internalRemove(e.element);
@@ -82,12 +64,32 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
     val = computeValue();
   }
 
-  public OrSet(OrSet<E> left, OrSet<E> right){
-    BiConsumer<Map<E, Set<UUID>>, Map<E, Set<UUID>>> internalMerge = (items, other) -> {
-      for (Entry<E, Set<UUID>> l : other.entrySet()){
-        internalSetMerge(items, l.getKey(), l.getValue());
+  /**
+   * This constructor is the way to remove elements from an existing set
+   *
+   * @param set
+   * @param builder
+   */
+  public OrSet(OrSet<E> set, Builder<E> builder) {
+    elements.putAll(set.elements);
+    tombstones.putAll(set.tombstones);
+    for (Builder<E>.OrSetElement<E> e : builder.elements) {
+      if (e.operation == Operation.ADD) {
+        internalAdd(e.element);
+      } else {
+        internalRemove(e.element);
       }
-    };
+    }
+    val = computeValue();
+  }
+
+  public OrSet(OrSet<E> left, OrSet<E> right) {
+    BiConsumer<Map<E, Set<UUID>>, Map<E, Set<UUID>>> internalMerge =
+        (items, other) -> {
+          for (Entry<E, Set<UUID>> l : other.entrySet()) {
+            internalSetMerge(items, l.getKey(), l.getValue());
+          }
+        };
 
     internalMerge.accept(elements, left.elements);
     internalMerge.accept(elements, right.elements);
@@ -121,31 +123,31 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
     return new OrSet<>(this, new Builder<E>().remove(e));
   }
 
-  public OrSet.Builder<E> builder(){
+  public OrSet.Builder<E> builder() {
     return new OrSet.Builder<>();
   }
-  
+
   @Override
   public OrSet<E> merge(OrSet<E> other) {
     return new OrSet<E>(this, other);
   }
-  
+
   private void internalAdd(E element) {
     Set<UUID> toMerge = new HashSet<>();
     toMerge.add(UUID.randomUUID());
     internalSetMerge(elements, element, toMerge);
   }
-  
-  private void internalRemove(E element){
+
+  private void internalRemove(E element) {
     internalSetMerge(tombstones, element, elements.get(element));
   }
 
   /*
    * Computes the live values by analyzing the elements and tombstones
    */
-  private Set<E> computeValue(){
+  private Set<E> computeValue() {
     Set<E> values = new HashSet<>();
-    for (Entry<E, Set<UUID>> entry: elements.entrySet()){
+    for (Entry<E, Set<UUID>> entry : elements.entrySet()) {
       Set<UUID> deleteIds = tombstones.get(entry.getKey());
       // if not all tokens for current element are in tombstones
       if (deleteIds == null || !deleteIds.containsAll(entry.getValue())) {
@@ -154,7 +156,7 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
     }
     return values;
   }
-  
+
   @Override
   public Set<E> value() {
     return val;
@@ -164,7 +166,7 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
   public OrSet<E> optimize() {
     return this;
   }
-  
+
   public int size() {
     return value().size();
   }
@@ -195,7 +197,6 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
       public E next() {
         return managed.next();
       }
-
     };
   }
 
@@ -229,7 +230,7 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
 
   @Override
   public String toString() {
-    return "OrSet [elements=" + elements + ", tombstones=" + tombstones + "]" ;
+    return "OrSet [elements=" + elements + ", tombstones=" + tombstones + "]";
   }
 
   @Override
@@ -242,19 +243,14 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     @SuppressWarnings("rawtypes")
     OrSet other = (OrSet) obj;
     if (elements == null) {
-      if (other.elements != null)
-        return false;
-    } else if (!value().equals(other.value()))
-      return false;
+      if (other.elements != null) return false;
+    } else if (!value().equals(other.value())) return false;
     return true;
   }
 
@@ -267,7 +263,8 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
   }
 
   public static class Builder<E> {
-        private List<OrSetElement<E>> elements = new ArrayList<>();;
+    private List<OrSetElement<E>> elements = new ArrayList<>();
+    ;
 
     public Builder<E> add(E element) {
       elements.add(new OrSetElement<E>(element, Operation.ADD));
@@ -284,8 +281,9 @@ public class OrSet<E>  implements CrdtAddRemoveSet<E, Set<E>, OrSet<E>> {
       return this;
     }
 
-public static enum Operation {
-      ADD, REMOVE
+    public static enum Operation {
+      ADD,
+      REMOVE
     }
 
     private class OrSetElement<EL> {
@@ -298,5 +296,4 @@ public static enum Operation {
       }
     }
   }
-
 }

@@ -21,10 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.gossip.lock.LockManagerSettings;
 
-/**
- * In this object the settings used by the GossipService are held.
- * 
- */
+/** In this object the settings used by the GossipService are held. */
 public class GossipSettings {
 
   /** Time between gossip'ing in ms. Default is 1 second. */
@@ -35,58 +32,59 @@ public class GossipSettings {
 
   /** the minimum samples needed before reporting a result */
   private int minimumSamples = 5;
-  
+
   /** the number of samples to keep per host */
   private int windowSize = 5000;
-  
+
   /** the threshold for the detector */
   private double convictThreshold = 10;
-  
+
   private String distribution = "normal";
-  
+
   private String activeGossipClass = "org.apache.gossip.manager.SimpleActiveGossiper";
 
   private String transportManagerClass = "org.apache.gossip.transport.udp.UdpTransportManager";
   private String protocolManagerClass = "org.apache.gossip.protocol.json.JacksonProtocolManager";
-  
-  private Map<String,String> activeGossipProperties = new HashMap<>();
-  
+
+  private Map<String, String> activeGossipProperties = new HashMap<>();
+
   private String pathToRingState = "./";
-  
+
   private boolean persistRingState = true;
-  
+
   private String pathToDataState = "./";
-  
+
   private boolean persistDataState = true;
-  
+
   private String pathToKeyStore = "./keys";
-  
+
   private boolean signMessages = false;
 
   // Settings related to lock manager
-  private LockManagerSettings lockManagerSettings = LockManagerSettings
-          .getLockManagerDefaultSettings();
-  
+  private LockManagerSettings lockManagerSettings =
+      LockManagerSettings.getLockManagerDefaultSettings();
+
   private boolean bulkTransfer = false;
 
   private int bulkTransferSize = StartupSettings.DEFAULT_BULK_TRANSFER_SIZE;
-  
-  /**
-   * Construct GossipSettings with default settings.
-   */
-  public GossipSettings() {
-  }
+
+  /** Construct GossipSettings with default settings. */
+  public GossipSettings() {}
 
   /**
    * Construct GossipSettings with given settings.
-   * 
-   * @param gossipInterval
-   *          The gossip interval in ms.
-   * @param cleanupInterval
-   *          The cleanup interval in ms.
+   *
+   * @param gossipInterval The gossip interval in ms.
+   * @param cleanupInterval The cleanup interval in ms.
    */
-  public GossipSettings(int gossipInterval, int cleanupInterval, int windowSize, int minimumSamples,
-          double convictThreshold, String distribution, boolean bulkTransfer) {
+  public GossipSettings(
+      int gossipInterval,
+      int cleanupInterval,
+      int windowSize,
+      int minimumSamples,
+      double convictThreshold,
+      String distribution,
+      boolean bulkTransfer) {
     this.gossipInterval = gossipInterval;
     this.cleanupInterval = cleanupInterval;
     this.windowSize = windowSize;
@@ -98,9 +96,8 @@ public class GossipSettings {
 
   /**
    * Set the gossip interval. This is the time between a gossip message is send.
-   * 
-   * @param gossipInterval
-   *          The gossip interval in ms.
+   *
+   * @param gossipInterval The gossip interval in ms.
    */
   public void setGossipTimeout(int gossipInterval) {
     this.gossipInterval = gossipInterval;
@@ -121,7 +118,7 @@ public class GossipSettings {
 
   /**
    * Get the clean interval.
-   * 
+   *
    * @return The cleanup interval.
    */
   public int getCleanupInterval() {
@@ -132,8 +129,7 @@ public class GossipSettings {
    * Set the cleanup interval. This is the time between the last heartbeat received from a member
    * and when it will be marked as dead.
    *
-   * @param cleanupInterval
-   *          The cleanup interval in ms.
+   * @param cleanupInterval The cleanup interval in ms.
    */
   public void setCleanupInterval(int cleanupInterval) {
     this.cleanupInterval = cleanupInterval;
@@ -257,6 +253,7 @@ public class GossipSettings {
 
   /**
    * Set the lock settings use by the lock manager
+   *
    * @param lockManagerSettings lock settings. This object cannot be null.
    */
   public void setLockManagerSettings(LockManagerSettings lockManagerSettings) {

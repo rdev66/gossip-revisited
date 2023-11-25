@@ -38,7 +38,8 @@ import org.apache.gossip.model.ShutdownMessage;
 import org.apache.gossip.udp.*;
 
 /**
- * The ActiveGossipThread sends information. Pick a random partner and send the membership list to that partner
+ * The ActiveGossipThread sends information. Pick a random partner and send the membership list to
+ * that partner
  */
 @Slf4j
 public abstract class AbstractActiveGossiper {
@@ -51,26 +52,26 @@ public abstract class AbstractActiveGossiper {
   private final Random random;
   private final GossipSettings gossipSettings;
 
-  public AbstractActiveGossiper(GossipManager gossipManager, GossipCore gossipCore, MetricRegistry registry) {
+  public AbstractActiveGossiper(
+      GossipManager gossipManager, GossipCore gossipCore, MetricRegistry registry) {
     this.gossipManager = gossipManager;
     this.gossipCore = gossipCore;
-    sharedDataHistogram = registry.histogram(name(AbstractActiveGossiper.class, "sharedDataHistogram-time"));
-    sendPerNodeDataHistogram = registry.histogram(name(AbstractActiveGossiper.class, "sendPerNodeDataHistogram-time"));
-    sendMembershipHistogram = registry.histogram(name(AbstractActiveGossiper.class, "sendMembershipHistogram-time"));
+    sharedDataHistogram =
+        registry.histogram(name(AbstractActiveGossiper.class, "sharedDataHistogram-time"));
+    sendPerNodeDataHistogram =
+        registry.histogram(name(AbstractActiveGossiper.class, "sendPerNodeDataHistogram-time"));
+    sendMembershipHistogram =
+        registry.histogram(name(AbstractActiveGossiper.class, "sendMembershipHistogram-time"));
     random = new Random();
     gossipSettings = gossipManager.getSettings();
   }
 
-  public void init() {
+  public void init() {}
 
-  }
+  public void shutdown() {}
 
-  public void shutdown() {
-
-  }
-
-  public final void sendShutdownMessage(LocalMember me, LocalMember target){
-    if (target == null){
+  public final void sendShutdownMessage(LocalMember me, LocalMember target) {
+    if (target == null) {
       return;
     }
     ShutdownMessage m = new ShutdownMessage();
@@ -94,8 +95,11 @@ public abstract class AbstractActiveGossiper {
 
   /** Send shared data one entry at a time. */
   private void sendSharedDataInternal(LocalMember me, LocalMember member) {
-    for (Entry<String, SharedDataMessage> innerEntry : gossipCore.getSharedData().entrySet()){
-      if (innerEntry.getValue().getReplicable() != null && !innerEntry.getValue().getReplicable()
+    for (Entry<String, SharedDataMessage> innerEntry : gossipCore.getSharedData().entrySet()) {
+      if (innerEntry.getValue().getReplicable() != null
+          && !innerEntry
+              .getValue()
+              .getReplicable()
               .shouldReplicate(me, member, innerEntry.getValue())) {
         continue;
       }
@@ -113,7 +117,10 @@ public abstract class AbstractActiveGossiper {
     udpMessage.setUuid(UUID.randomUUID().toString());
     udpMessage.setUriFrom(me.getId());
     for (Entry<String, SharedDataMessage> innerEntry : gossipCore.getSharedData().entrySet()) {
-      if (innerEntry.getValue().getReplicable() != null && !innerEntry.getValue().getReplicable()
+      if (innerEntry.getValue().getReplicable() != null
+          && !innerEntry
+              .getValue()
+              .getReplicable()
               .shouldReplicate(me, member, innerEntry.getValue())) {
         continue;
       }
@@ -141,8 +148,8 @@ public abstract class AbstractActiveGossiper {
     copy.setReplicable(original.getReplicable());
   }
 
-  public final void sendPerNodeData(LocalMember me, LocalMember member){
-    if (member == null){
+  public final void sendPerNodeData(LocalMember me, LocalMember member) {
+    if (member == null) {
       return;
     }
     long startTime = System.currentTimeMillis();
@@ -156,9 +163,13 @@ public abstract class AbstractActiveGossiper {
 
   /** Send per node data one entry at a time. */
   private void sendPerNodeDataInternal(LocalMember me, LocalMember member) {
-    for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> entry : gossipCore.getPerNodeData().entrySet()){
-      for (Entry<String, PerNodeDataMessage> innerEntry : entry.getValue().entrySet()){
-        if (innerEntry.getValue().getReplicable() != null && !innerEntry.getValue().getReplicable()
+    for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> entry :
+        gossipCore.getPerNodeData().entrySet()) {
+      for (Entry<String, PerNodeDataMessage> innerEntry : entry.getValue().entrySet()) {
+        if (innerEntry.getValue().getReplicable() != null
+            && !innerEntry
+                .getValue()
+                .getReplicable()
                 .shouldReplicate(me, member, innerEntry.getValue())) {
           continue;
         }
@@ -169,17 +180,20 @@ public abstract class AbstractActiveGossiper {
         gossipCore.sendOneWay(message, member.getUri());
       }
     }
-
   }
 
   /** Send per node data by batching together several entries. */
   private void sendPerNodeDataInBulkInternal(LocalMember me, LocalMember member) {
-    for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> entry : gossipCore.getPerNodeData().entrySet()){
+    for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> entry :
+        gossipCore.getPerNodeData().entrySet()) {
       UdpPerNodeDataBulkMessage udpMessage = new UdpPerNodeDataBulkMessage();
       udpMessage.setUuid(UUID.randomUUID().toString());
       udpMessage.setUriFrom(me.getId());
-      for (Entry<String, PerNodeDataMessage> innerEntry : entry.getValue().entrySet()){
-        if (innerEntry.getValue().getReplicable() != null && !innerEntry.getValue().getReplicable()
+      for (Entry<String, PerNodeDataMessage> innerEntry : entry.getValue().entrySet()) {
+        if (innerEntry.getValue().getReplicable() != null
+            && !innerEntry
+                .getValue()
+                .getReplicable()
                 .shouldReplicate(me, member, innerEntry.getValue())) {
           continue;
         }
@@ -208,11 +222,9 @@ public abstract class AbstractActiveGossiper {
     copy.setReplicable(original.getReplicable());
   }
 
-  /**
-   * Performs the sending of the membership list, after we have incremented our own heartbeat.
-   */
+  /** Performs the sending of the membership list, after we have incremented our own heartbeat. */
   protected void sendMembershipList(LocalMember me, LocalMember member) {
-    if (member == null){
+    if (member == null) {
       return;
     }
     long startTime = System.currentTimeMillis();
@@ -225,15 +237,15 @@ public abstract class AbstractActiveGossiper {
       message.getMembers().add(convert(other));
     }
     Response r = gossipCore.send(message, member.getUri());
-    if (r instanceof ActiveGossipOk){
-      //maybe count metrics here
+    if (r instanceof ActiveGossipOk) {
+      // maybe count metrics here
     } else {
       log.debug("Message " + message + " generated response " + r);
     }
     sendMembershipHistogram.update(System.currentTimeMillis() - startTime);
   }
 
-  protected final Member convert(LocalMember member){
+  protected final Member convert(LocalMember member) {
     Member gm = new Member();
     gm.setCluster(member.getClusterName());
     gm.setHeartbeat(member.getHeartbeat());
@@ -244,9 +256,7 @@ public abstract class AbstractActiveGossiper {
   }
 
   /**
-   *
-   * @param memberList
-   *          An immutable list
+   * @param memberList An immutable list
    * @return The chosen LocalGossipMember to gossip with.
    */
   protected LocalMember selectPartner(List<LocalMember> memberList) {

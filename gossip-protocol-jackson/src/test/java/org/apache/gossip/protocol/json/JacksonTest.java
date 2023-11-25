@@ -18,6 +18,8 @@
 
 package org.apache.gossip.protocol.json;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -37,8 +39,6 @@ import org.apache.gossip.manager.GossipManagerBuilder;
 import org.apache.gossip.protocol.ProtocolManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class JacksonTest {
 

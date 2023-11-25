@@ -17,6 +17,7 @@
  */
 package org.apache.gossip;
 
+import io.teknek.tunit.TUnit;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -26,13 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.gossip.manager.DatacenterRackAwareActiveGossiper;
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.manager.GossipManagerBuilder;
 import org.junit.jupiter.api.Test;
-
-import io.teknek.tunit.TUnit;
 
 public class IdAndPropertyTest extends AbstractIntegrationBase {
 

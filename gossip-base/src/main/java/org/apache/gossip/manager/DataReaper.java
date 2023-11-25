@@ -37,48 +37,50 @@ public class DataReaper {
   private final GossipCore gossipCore;
   private final ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
   private final Clock clock;
-  
-  public DataReaper(GossipCore gossipCore, Clock clock){
+
+  public DataReaper(GossipCore gossipCore, Clock clock) {
     this.gossipCore = gossipCore;
     this.clock = clock;
   }
-  
-  public void init(){
-    Runnable reapPerNodeData = () -> {
-      runPerNodeOnce();
-      runSharedOnce();
-    };
+
+  public void init() {
+    Runnable reapPerNodeData =
+        () -> {
+          runPerNodeOnce();
+          runSharedOnce();
+        };
     scheduledExecutor.scheduleAtFixedRate(reapPerNodeData, 0, 5, TimeUnit.SECONDS);
   }
-  
-  void runSharedOnce(){
-    for (Entry<String, SharedDataMessage> entry : gossipCore.getSharedData().entrySet()){
-      if (entry.getValue().getExpireAt() < clock.currentTimeMillis()){
+
+  void runSharedOnce() {
+    for (Entry<String, SharedDataMessage> entry : gossipCore.getSharedData().entrySet()) {
+      if (entry.getValue().getExpireAt() < clock.currentTimeMillis()) {
         gossipCore.getSharedData().remove(entry.getKey(), entry.getValue());
       }
     }
   }
-  
-  void runPerNodeOnce(){
-    for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> node : gossipCore.getPerNodeData().entrySet()){
+
+  void runPerNodeOnce() {
+    for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> node :
+        gossipCore.getPerNodeData().entrySet()) {
       reapData(node.getValue());
     }
   }
-  
-  void reapData(ConcurrentHashMap<String, PerNodeDataMessage> concurrentHashMap){
-    for (Entry<String, PerNodeDataMessage> entry : concurrentHashMap.entrySet()){
-      if (entry.getValue().getExpireAt() < clock.currentTimeMillis()){
+
+  void reapData(ConcurrentHashMap<String, PerNodeDataMessage> concurrentHashMap) {
+    for (Entry<String, PerNodeDataMessage> entry : concurrentHashMap.entrySet()) {
+      if (entry.getValue().getExpireAt() < clock.currentTimeMillis()) {
         concurrentHashMap.remove(entry.getKey(), entry.getValue());
       }
     }
   }
-  
-  public void close(){
+
+  public void close() {
     scheduledExecutor.shutdown();
     try {
       scheduledExecutor.awaitTermination(1, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
-      
+
     }
   }
 }

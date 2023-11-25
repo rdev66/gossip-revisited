@@ -28,7 +28,8 @@ import org.junit.Test;
 public class MessageHandlerTest {
   @Test
   public void testSimpleHandler() {
-    MessageHandler mi = new TypedMessageHandlerWrapper(FakeMessage.class, new DummyMessageHandler());
+    MessageHandler mi =
+        new TypedMessageHandlerWrapper(FakeMessage.class, new DummyMessageHandler());
     Assert.assertTrue(mi.invoke(null, null, new FakeMessage()));
     Assert.assertFalse(mi.invoke(null, null, new ActiveGossipMessage()));
   }
@@ -72,7 +73,8 @@ public class MessageHandlerTest {
   @Test
   public void testMessageHandlerCombiner() {
     // Empty combiner - false result
-    MessageHandler mi = MessageHandlerFactory.concurrentHandler((gossipCore, gossipManager, base) -> false);
+    MessageHandler mi =
+        MessageHandlerFactory.concurrentHandler((gossipCore, gossipManager, base) -> false);
     Assert.assertFalse(mi.invoke(null, null, new Base()));
 
     DummyMessageHandler h = new DummyMessageHandler();
@@ -86,7 +88,9 @@ public class MessageHandlerTest {
     Assert.assertEquals(2, h.counter);
 
     // Increase size in runtime. Should be 3 calls: 2+3 = 5
-    mi = MessageHandlerFactory.concurrentHandler(mi, new TypedMessageHandlerWrapper(FakeMessage.class, h));
+    mi =
+        MessageHandlerFactory.concurrentHandler(
+            mi, new TypedMessageHandlerWrapper(FakeMessage.class, h));
     Assert.assertTrue(mi.invoke(null, null, new FakeMessage()));
     Assert.assertEquals(5, h.counter);
   }

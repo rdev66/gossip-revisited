@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.apache.gossip.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,21 +35,21 @@ public class RingStatePersister implements Runnable {
   // NOTE: this is a different instance than what gets used for message marshalling.
   private final ObjectMapper objectMapper;
   private final GossipManager manager;
-  
-  public RingStatePersister(File path, GossipManager manager){
+
+  public RingStatePersister(File path, GossipManager manager) {
     this.path = path;
     this.objectMapper = GossipManager.metdataObjectMapper;
     this.manager = manager;
   }
-  
+
   @Override
   public void run() {
     writeToDisk();
   }
-  
+
   void writeToDisk() {
     NavigableSet<LocalMember> i = manager.getMembers().keySet();
-    try (FileOutputStream fos = new FileOutputStream(path)){
+    try (FileOutputStream fos = new FileOutputStream(path)) {
       objectMapper.writeValue(fos, i);
     } catch (IOException e) {
       log.error("Error!", e);
@@ -61,7 +61,7 @@ public class RingStatePersister implements Runnable {
     if (!path.exists()) {
       return new ArrayList<>();
     }
-    try (FileInputStream fos = new FileInputStream(path)){
+    try (FileInputStream fos = new FileInputStream(path)) {
       return objectMapper.readValue(fos, ArrayList.class);
     } catch (IOException e) {
       log.error("Error", e);

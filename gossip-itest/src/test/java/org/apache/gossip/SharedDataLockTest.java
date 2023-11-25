@@ -17,13 +17,6 @@
  */
 package org.apache.gossip;
 
-import org.apache.gossip.lock.exceptions.VoteFailedException;
-import org.apache.gossip.manager.GossipManager;
-import org.apache.gossip.manager.GossipManagerBuilder;
-import org.apache.gossip.model.SharedDataMessage;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -31,6 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.gossip.lock.exceptions.VoteFailedException;
+import org.apache.gossip.manager.GossipManager;
+import org.apache.gossip.manager.GossipManagerBuilder;
+import org.apache.gossip.model.SharedDataMessage;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class SharedDataLockTest extends AbstractIntegrationBase {
 

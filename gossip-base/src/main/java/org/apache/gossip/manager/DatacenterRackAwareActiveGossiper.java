@@ -31,11 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.LocalMember;
 
 /**
- * Sends gossip traffic at different rates to other racks and data-centers.
- * This implementation controls the rate at which gossip traffic is shared. 
- * There are two constructs Datacenter and Rack. It is assumed that bandwidth and latency is higher
- * in the rack than in the the datacenter. We can adjust the rate at which we send messages to each group.
- * 
+ * Sends gossip traffic at different rates to other racks and data-centers. This implementation
+ * controls the rate at which gossip traffic is shared. There are two constructs Datacenter and
+ * Rack. It is assumed that bandwidth and latency is higher in the rack than in the the datacenter.
+ * We can adjust the rate at which we send messages to each group.
  */
 @Slf4j
 public class DatacenterRackAwareActiveGossiper extends AbstractActiveGossiper {
@@ -49,125 +48,166 @@ public class DatacenterRackAwareActiveGossiper extends AbstractActiveGossiper {
   private int randomDeadMemberSendIntervalMs = 250;
   private ScheduledExecutorService scheduledExecutorService;
   private ThreadPoolExecutor threadService;
-  
-  public DatacenterRackAwareActiveGossiper(GossipManager gossipManager, GossipCore gossipCore,
-          MetricRegistry registry) {
+
+  public DatacenterRackAwareActiveGossiper(
+      GossipManager gossipManager, GossipCore gossipCore, MetricRegistry registry) {
     super(gossipManager, gossipCore, registry);
     scheduledExecutorService = Executors.newScheduledThreadPool(2);
     workQueue = new ArrayBlockingQueue<Runnable>(1024);
-    threadService = new ThreadPoolExecutor(1, 30, 1, TimeUnit.SECONDS, workQueue,
-            new ThreadPoolExecutor.DiscardOldestPolicy());
+    threadService =
+        new ThreadPoolExecutor(
+            1, 30, 1, TimeUnit.SECONDS, workQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
     try {
-      sameRackGossipIntervalMs = Integer.parseInt(gossipManager.getSettings()
-              .getActiveGossipProperties().get("sameRackGossipIntervalMs"));
-    } catch (RuntimeException ex) { }
+      sameRackGossipIntervalMs =
+          Integer.parseInt(
+              gossipManager
+                  .getSettings()
+                  .getActiveGossipProperties()
+                  .get("sameRackGossipIntervalMs"));
+    } catch (RuntimeException ex) {
+    }
     try {
-      sameDcGossipIntervalMs = Integer.parseInt(gossipManager.getSettings()
-              .getActiveGossipProperties().get("sameDcGossipIntervalMs"));
-    } catch (RuntimeException ex) { }
+      sameDcGossipIntervalMs =
+          Integer.parseInt(
+              gossipManager
+                  .getSettings()
+                  .getActiveGossipProperties()
+                  .get("sameDcGossipIntervalMs"));
+    } catch (RuntimeException ex) {
+    }
     try {
-      differentDatacenterGossipIntervalMs = Integer.parseInt(gossipManager.getSettings()
-              .getActiveGossipProperties().get("differentDatacenterGossipIntervalMs"));
-    } catch (RuntimeException ex) { }
+      differentDatacenterGossipIntervalMs =
+          Integer.parseInt(
+              gossipManager
+                  .getSettings()
+                  .getActiveGossipProperties()
+                  .get("differentDatacenterGossipIntervalMs"));
+    } catch (RuntimeException ex) {
+    }
     try {
-      randomDeadMemberSendIntervalMs = Integer.parseInt(gossipManager.getSettings()
-              .getActiveGossipProperties().get("randomDeadMemberSendIntervalMs"));
-    } catch (RuntimeException ex) { }
+      randomDeadMemberSendIntervalMs =
+          Integer.parseInt(
+              gossipManager
+                  .getSettings()
+                  .getActiveGossipProperties()
+                  .get("randomDeadMemberSendIntervalMs"));
+    } catch (RuntimeException ex) {
+    }
   }
 
   @Override
   public void init() {
     super.init();
-    //same rack
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-      threadService.execute(() -> sendToSameRackMember()), 
-      0, sameRackGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-      threadService.execute(() -> sendToSameRackMemberPerNode()), 
-      0, sameRackGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-      threadService.execute(() -> sendToSameRackShared()), 
-      0, sameRackGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    //same dc different rack
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-      threadService.execute(() -> sameDcDiffernetRackMember()), 
-      0, sameDcGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-    threadService.execute(() -> sameDcDiffernetRackPerNode()), 
-    0, sameDcGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-    threadService.execute(() -> sameDcDiffernetRackShared()), 
-    0, sameDcGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    //different dc
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-      threadService.execute(() -> differentDcMember()), 
-      0, differentDatacenterGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-    threadService.execute(() -> differentDcPerNode()), 
-    0, differentDatacenterGossipIntervalMs, TimeUnit.MILLISECONDS);
-  
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-    threadService.execute(() -> differentDcShared()), 
-    0, differentDatacenterGossipIntervalMs, TimeUnit.MILLISECONDS);
-    
-    //the dead
-    scheduledExecutorService.scheduleAtFixedRate(() -> 
-      threadService.execute(() -> sendToDeadMember()), 
-      0, randomDeadMemberSendIntervalMs, TimeUnit.MILLISECONDS);
-    
+    // same rack
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sendToSameRackMember()),
+        0,
+        sameRackGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sendToSameRackMemberPerNode()),
+        0,
+        sameRackGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sendToSameRackShared()),
+        0,
+        sameRackGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    // same dc different rack
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sameDcDiffernetRackMember()),
+        0,
+        sameDcGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sameDcDiffernetRackPerNode()),
+        0,
+        sameDcGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sameDcDiffernetRackShared()),
+        0,
+        sameDcGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    // different dc
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> differentDcMember()),
+        0,
+        differentDatacenterGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> differentDcPerNode()),
+        0,
+        differentDatacenterGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> differentDcShared()),
+        0,
+        differentDatacenterGossipIntervalMs,
+        TimeUnit.MILLISECONDS);
+
+    // the dead
+    scheduledExecutorService.scheduleAtFixedRate(
+        () -> threadService.execute(() -> sendToDeadMember()),
+        0,
+        randomDeadMemberSendIntervalMs,
+        TimeUnit.MILLISECONDS);
   }
 
   private void sendToDeadMember() {
     sendMembershipList(gossipManager.getMyself(), selectPartner(gossipManager.getDeadMembers()));
   }
-  
-  private List<LocalMember> differentDataCenter(){
+
+  private List<LocalMember> differentDataCenter() {
     String myDc = gossipManager.getMyself().getProperties().get(DATACENTER);
     String rack = gossipManager.getMyself().getProperties().get(RACK);
-    if (myDc == null|| rack == null){
+    if (myDc == null || rack == null) {
       return Collections.emptyList();
     }
     List<LocalMember> notMyDc = new ArrayList<LocalMember>(10);
-    for (LocalMember i : gossipManager.getLiveMembers()){
-      if (!myDc.equals(i.getProperties().get(DATACENTER))){
+    for (LocalMember i : gossipManager.getLiveMembers()) {
+      if (!myDc.equals(i.getProperties().get(DATACENTER))) {
         notMyDc.add(i);
       }
     }
     return notMyDc;
   }
-  
-  private List<LocalMember> sameDatacenterDifferentRack(){
+
+  private List<LocalMember> sameDatacenterDifferentRack() {
     String myDc = gossipManager.getMyself().getProperties().get(DATACENTER);
     String rack = gossipManager.getMyself().getProperties().get(RACK);
-    if (myDc == null|| rack == null){
+    if (myDc == null || rack == null) {
       return Collections.emptyList();
     }
     List<LocalMember> notMyDc = new ArrayList<LocalMember>(10);
-    for (LocalMember i : gossipManager.getLiveMembers()){
-      if (myDc.equals(i.getProperties().get(DATACENTER)) && !rack.equals(i.getProperties().get(RACK))){
+    for (LocalMember i : gossipManager.getLiveMembers()) {
+      if (myDc.equals(i.getProperties().get(DATACENTER))
+          && !rack.equals(i.getProperties().get(RACK))) {
         notMyDc.add(i);
       }
     }
     return notMyDc;
   }
-    
-  private List<LocalMember> sameRackNodes(){
+
+  private List<LocalMember> sameRackNodes() {
     String myDc = gossipManager.getMyself().getProperties().get(DATACENTER);
     String rack = gossipManager.getMyself().getProperties().get(RACK);
-    if (myDc == null|| rack == null){
+    if (myDc == null || rack == null) {
       return Collections.emptyList();
     }
     List<LocalMember> sameDcAndRack = new ArrayList<LocalMember>(10);
-    for (LocalMember i : gossipManager.getLiveMembers()){
+    for (LocalMember i : gossipManager.getLiveMembers()) {
       if (myDc.equals(i.getProperties().get(DATACENTER))
-              && rack.equals(i.getProperties().get(RACK))){
+          && rack.equals(i.getProperties().get(RACK))) {
         sameDcAndRack.add(i);
       }
     }
@@ -178,39 +218,39 @@ public class DatacenterRackAwareActiveGossiper extends AbstractActiveGossiper {
     LocalMember i = selectPartner(sameRackNodes());
     sendMembershipList(gossipManager.getMyself(), i);
   }
-  
+
   private void sendToSameRackMemberPerNode() {
     sendPerNodeData(gossipManager.getMyself(), selectPartner(sameRackNodes()));
   }
-  
+
   private void sendToSameRackShared() {
     sendSharedData(gossipManager.getMyself(), selectPartner(sameRackNodes()));
   }
-  
+
   private void differentDcMember() {
     sendMembershipList(gossipManager.getMyself(), selectPartner(differentDataCenter()));
   }
-  
+
   private void differentDcPerNode() {
     sendPerNodeData(gossipManager.getMyself(), selectPartner(differentDataCenter()));
   }
-  
+
   private void differentDcShared() {
     sendSharedData(gossipManager.getMyself(), selectPartner(differentDataCenter()));
   }
-  
+
   private void sameDcDiffernetRackMember() {
     sendMembershipList(gossipManager.getMyself(), selectPartner(sameDatacenterDifferentRack()));
   }
-  
+
   private void sameDcDiffernetRackPerNode() {
     sendPerNodeData(gossipManager.getMyself(), selectPartner(sameDatacenterDifferentRack()));
   }
-  
+
   private void sameDcDiffernetRackShared() {
     sendSharedData(gossipManager.getMyself(), selectPartner(sameDatacenterDifferentRack()));
   }
-  
+
   @Override
   public void shutdown() {
     super.shutdown();
@@ -228,11 +268,9 @@ public class DatacenterRackAwareActiveGossiper extends AbstractActiveGossiper {
       log.debug("Issue during shutdown", e);
     }
   }
-  
-  /**
-   * sends an optimistic shutdown message to several clusters nodes
-   */
-  protected void sendShutdownMessage(){
+
+  /** sends an optimistic shutdown message to several clusters nodes */
+  protected void sendShutdownMessage() {
     List<LocalMember> l = gossipManager.getLiveMembers();
     int sendTo = l.size() < 3 ? 1 : l.size() / 3;
     for (int i = 0; i < sendTo; i++) {

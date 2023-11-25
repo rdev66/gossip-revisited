@@ -17,14 +17,12 @@
  */
 package org.apache.gossip.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.SharedDataMessage;
@@ -48,14 +46,14 @@ public class UserDataPersister implements Runnable {
   @SuppressWarnings("unchecked")
   ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>> readPerNodeFromDisk() {
     if (!perNodePath.exists()) {
-      return new ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>>();
+      return new ConcurrentHashMap<>();
     }
     try (FileInputStream fos = new FileInputStream(perNodePath)) {
       return objectMapper.readValue(fos, ConcurrentHashMap.class);
     } catch (IOException e) {
       log.error("Error!", e);
     }
-    return new ConcurrentHashMap<String, ConcurrentHashMap<String, PerNodeDataMessage>>();
+    return new ConcurrentHashMap<>();
   }
 
   void writePerNodeToDisk() {

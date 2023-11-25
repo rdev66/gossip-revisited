@@ -25,22 +25,22 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class OrSetTest extends AddRemoveStringSetTest<OrSet<String>> {
-  OrSet<String> construct(){
+  OrSet<String> construct() {
     return new OrSet<>();
   }
 
-  OrSet<String> construct(Set<String> set){
+  OrSet<String> construct(Set<String> set) {
     return new OrSet<>(set);
   }
 
   @Test
-  public void atest(){
+  public void atest() {
     OrSet<Integer> i = new OrSet<>(new OrSet.Builder<Integer>().add(4).add(5).add(6).remove(5));
     Assert.assertArrayEquals(Arrays.asList(4, 6).toArray(), i.value().toArray());
   }
 
   @Test
-  public void mergeTest(){
+  public void mergeTest() {
     OrSet<Integer> i = new OrSet<>(new OrSet.Builder<Integer>().add(4).add(5).add(6).remove(5));
     Assert.assertArrayEquals(Arrays.asList(4, 6).toArray(), i.value().toArray());
     OrSet<Integer> j = new OrSet<>(new OrSet.Builder<Integer>().add(9).add(4).add(5).remove(6));
@@ -49,11 +49,11 @@ public class OrSetTest extends AddRemoveStringSetTest<OrSet<String>> {
   }
 
   @Test
-  public void mergeTest2(){
+  public void mergeTest2() {
     OrSet<Integer> i = new OrSet<>(new OrSet.Builder<Integer>().add(5).add(4).remove(4).add(6));
     Assert.assertEquals(new OrSet<>(5, 6), i);
     SortedSet<Integer> tree = new TreeSet<>();
-    for (Integer in : i.value()){
+    for (Integer in : i.value()) {
       tree.add(in);
     }
     TreeSet<Integer> compare = new TreeSet<>();
@@ -63,32 +63,32 @@ public class OrSetTest extends AddRemoveStringSetTest<OrSet<String>> {
   }
 
   @Test
-  public void mergeTest4(){
-    Assert.assertArrayEquals(new Integer[]{},
-        new OrSet<>(new OrSet.Builder<Integer>().add(1).remove(1)).toArray());
+  public void mergeTest4() {
+    Assert.assertArrayEquals(
+        new Integer[] {}, new OrSet<>(new OrSet.Builder<Integer>().add(1).remove(1)).toArray());
   }
 
   @Test
-  public void mergeTest3(){
+  public void mergeTest3() {
     OrSet<Integer> i = new OrSet<>(1);
     OrSet<Integer> j = new OrSet<>(2);
     OrSet<Integer> k = new OrSet<>(i.merge(j), new OrSet.Builder<Integer>().remove(1));
-    Assert.assertArrayEquals(new Integer[]{2}, i.merge(j).merge(k).toArray());
-    Assert.assertArrayEquals(new Integer[]{2}, j.merge(i).merge(k).toArray());
-    Assert.assertArrayEquals(new Integer[]{2}, k.merge(i).merge(j).toArray());
-    Assert.assertArrayEquals(new Integer[]{2}, k.merge(j).merge(i).toArray());
+    Assert.assertArrayEquals(new Integer[] {2}, i.merge(j).merge(k).toArray());
+    Assert.assertArrayEquals(new Integer[] {2}, j.merge(i).merge(k).toArray());
+    Assert.assertArrayEquals(new Integer[] {2}, k.merge(i).merge(j).toArray());
+    Assert.assertArrayEquals(new Integer[] {2}, k.merge(j).merge(i).toArray());
     Assert.assertEquals(j, i.merge(j.merge(k)));
   }
 
   @Test
-  public void mergeTest9(){
+  public void mergeTest9() {
     OrSet<Integer> i = new OrSet<>(19);
     OrSet<Integer> j = i.merge(i);
     Assert.assertEquals(i.value(), j.value());
   }
 
   @Test
-  public void mergeTestSame(){
+  public void mergeTestSame() {
     OrSet<Integer> i = new OrSet<>(19);
     OrSet<Integer> j = new OrSet<>(19);
     OrSet<Integer> k = i.merge(j);

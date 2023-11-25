@@ -18,7 +18,6 @@
 package org.apache.gossip;
 
 import io.teknek.tunit.TUnit;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.gossip.GossipSettings;
@@ -37,7 +38,7 @@ public class StandAloneDatacenterAndRack extends StandAloneExampleBase {
     initGossipManager(args);
   }
 
-  public static void main(String[] args) throws InterruptedException, IOException {
+  public static void main(String[] args) throws IOException {
     StandAloneDatacenterAndRack example = new StandAloneDatacenterAndRack(args);
     boolean willRead = true;
     example.exec(willRead);
@@ -61,8 +62,7 @@ public class StandAloneDatacenterAndRack extends StandAloneExampleBase {
             .uri(URI.create(args[0]))
             .id(args[1])
             .gossipSettings(s)
-            .gossipMembers(
-                Arrays.asList(new RemoteMember("mycluster", URI.create(args[2]), args[3])))
+            .gossipMembers(List.of(new RemoteMember("mycluster", URI.create(args[2]), args[3])))
             .properties(props)
             .build();
     manager.init();

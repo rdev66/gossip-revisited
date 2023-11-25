@@ -26,22 +26,17 @@ import org.apache.gossip.udp.UdpNotAMemberFault;
 import org.apache.gossip.udp.UdpPerNodeDataBulkMessage;
 import org.apache.gossip.udp.UdpSharedDataBulkMessage;
 
-@JsonTypeInfo(  
-        use = JsonTypeInfo.Id.CLASS,  
-        include = JsonTypeInfo.As.PROPERTY,  
-        property = "type") 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-        @Type(value = ActiveGossipMessage.class, name = "ActiveGossipMessage"),
-        @Type(value = Fault.class, name = "Fault"),
-        @Type(value = ActiveGossipOk.class, name = "ActiveGossipOk"),
-        @Type(value = UdpActiveGossipOk.class, name = "UdpActiveGossipOk"),
-        @Type(value = UdpActiveGossipMessage.class, name = "UdpActiveGossipMessage"),
-        @Type(value = UdpNotAMemberFault.class, name = "UdpNotAMemberFault"),
-        @Type(value = PerNodeDataMessage.class, name = "PerNodeDataMessage"),
-        @Type(value = UdpPerNodeDataBulkMessage.class, name = "UdpPerNodeDataMessage"),
-        @Type(value = SharedDataMessage.class, name = "SharedDataMessage"),
-        @Type(value = UdpSharedDataBulkMessage.class, name = "UdpSharedDataMessage")
-        })
-public class Base {
-
-}
+  @Type(value = ActiveGossipMessage.class, name = "ActiveGossipMessage"),
+  @Type(value = Fault.class, name = "Fault"),
+  @Type(value = ActiveGossipOk.class, name = "ActiveGossipOk"),
+  @Type(value = UdpActiveGossipOk.class, name = "UdpActiveGossipOk"),
+  @Type(value = UdpActiveGossipMessage.class, name = "UdpActiveGossipMessage"),
+  @Type(value = UdpNotAMemberFault.class, name = "UdpNotAMemberFault"),
+  @Type(value = PerNodeDataMessage.class, name = "PerNodeDataMessage"),
+  @Type(value = UdpPerNodeDataBulkMessage.class, name = "UdpPerNodeDataMessage"),
+  @Type(value = SharedDataMessage.class, name = "SharedDataMessage"),
+  @Type(value = UdpSharedDataBulkMessage.class, name = "UdpSharedDataMessage")
+})
+public class Base {}

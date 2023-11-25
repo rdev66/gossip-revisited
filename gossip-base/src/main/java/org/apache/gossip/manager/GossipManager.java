@@ -56,15 +56,16 @@ import org.apache.gossip.utils.ReflectionUtils;
 @Slf4j
 public class GossipManager {
 
-
   // this mapper is used for ring and user-data persistence only. NOT messages.
-  public static final ObjectMapper metdataObjectMapper = new ObjectMapper() {
-    @Serial
-    private static final long serialVersionUID = 1L;
-  {
-    enableDefaultTyping();
-    configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, false);
-  }};
+  public static final ObjectMapper metdataObjectMapper =
+      new ObjectMapper() {
+        @Serial private static final long serialVersionUID = 1L;
+
+        {
+          enableDefaultTyping();
+          configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, false);
+        }
+      };
 
   private final ConcurrentSkipListMap<LocalMember, GossipState> members;
   private final LocalMember me;
@@ -83,27 +84,47 @@ public class GossipManager {
   private TransportManager transportManager;
   private ProtocolManager protocolManager;
 
-  public GossipManager(String cluster,
-                       URI uri, String id, Map<String, String> properties, GossipSettings settings,
-                       List<Member> gossipMembers, GossipListener listener, MetricRegistry registry,
-                       MessageHandler messageHandler) {
+  public GossipManager(
+      String cluster,
+      URI uri,
+      String id,
+      Map<String, String> properties,
+      GossipSettings settings,
+      List<Member> gossipMembers,
+      GossipListener listener,
+      MetricRegistry registry,
+      MessageHandler messageHandler) {
     this.settings = settings;
     this.messageHandler = messageHandler;
 
     clock = new SystemClock();
-    me = new LocalMember(cluster, uri, id, clock.nanoTime(), properties,
-            settings.getWindowSize(), settings.getMinimumSamples(), settings.getDistribution());
+    me =
+        new LocalMember(
+            cluster,
+            uri,
+            id,
+            clock.nanoTime(),
+            properties,
+            settings.getWindowSize(),
+            settings.getMinimumSamples(),
+            settings.getDistribution());
     gossipCore = new GossipCore(this, registry);
     this.lockManager = new LockManager(this, settings.getLockManagerSettings(), registry);
     dataReaper = new DataReaper(gossipCore, clock);
     members = new ConcurrentSkipListMap<>();
     for (Member startupMember : gossipMembers) {
       if (!startupMember.equals(me)) {
-        LocalMember member = new LocalMember(startupMember.getClusterName(),
-                startupMember.getUri(), startupMember.getId(),
-                clock.nanoTime(), startupMember.getProperties(), settings.getWindowSize(),
-                settings.getMinimumSamples(), settings.getDistribution());
-        //TODO should members start in down state?
+        LocalMember member =
+            new LocalMember(
+                startupMember.getClusterName(),
+                startupMember.getUri(),
+                startupMember.getId(),
+                clock.nanoTime(),
+                startupMember.getProperties(),
+                settings.getWindowSize(),
+                settings.getMinimumSamples(),
+                settings.getDistribution());
+        // TODO should members start in down state?
         members.put(member, GossipState.DOWN);
       }
     }
@@ -111,28 +132,45 @@ public class GossipManager {
     this.scheduledServiced = Executors.newScheduledThreadPool(1);
     this.registry = registry;
     this.ringState = new RingStatePersister(GossipManager.buildRingStatePath(this), this);
-    this.userDataState = new UserDataPersister(
-        gossipCore,
-        GossipManager.buildPerNodeDataPath(this),
-        GossipManager.buildSharedDataPath(this));
-    this.memberStateRefresher = new GossipMemberStateRefresher(members, settings, listener, this::findPerNodeGossipData);
+    this.userDataState =
+        new UserDataPersister(
+            gossipCore,
+            GossipManager.buildPerNodeDataPath(this),
+            GossipManager.buildSharedDataPath(this));
+    this.memberStateRefresher =
+        new GossipMemberStateRefresher(members, settings, listener, this::findPerNodeGossipData);
     readSavedRingState();
     readSavedDataState();
   }
 
   public static File buildRingStatePath(GossipManager manager) {
-    return new File(manager.getSettings().getPathToRingState(), "ringstate." + manager.getMyself().getClusterName() + "."
-        + manager.getMyself().getId() + ".json");
+    return new File(
+        manager.getSettings().getPathToRingState(),
+        "ringstate."
+            + manager.getMyself().getClusterName()
+            + "."
+            + manager.getMyself().getId()
+            + ".json");
   }
 
-  public static File buildSharedDataPath(GossipManager manager){
-    return new File(manager.getSettings().getPathToDataState(), "shareddata."
-            + manager.getMyself().getClusterName() + "." + manager.getMyself().getId() + ".json");
+  public static File buildSharedDataPath(GossipManager manager) {
+    return new File(
+        manager.getSettings().getPathToDataState(),
+        "shareddata."
+            + manager.getMyself().getClusterName()
+            + "."
+            + manager.getMyself().getId()
+            + ".json");
   }
 
   public static File buildPerNodeDataPath(GossipManager manager) {
-    return new File(manager.getSettings().getPathToDataState(), "pernodedata."
-            + manager.getMyself().getClusterName() + "." + manager.getMyself().getId() + ".json");
+    return new File(
+        manager.getSettings().getPathToDataState(),
+        "pernodedata."
+            + manager.getMyself().getClusterName()
+            + "."
+            + manager.getMyself().getId()
+            + ".json");
   }
 
   public MessageHandler getMessageHandler() {
@@ -152,22 +190,21 @@ public class GossipManager {
    */
   public List<LocalMember> getDeadMembers() {
     return Collections.unmodifiableList(
-            members.entrySet()
-                    .stream()
-                    .filter(entry -> GossipState.DOWN.equals(entry.getValue()))
-                    .map(Entry::getKey).collect(Collectors.toList()));
+        members.entrySet().stream()
+            .filter(entry -> GossipState.DOWN.equals(entry.getValue()))
+            .map(Entry::getKey)
+            .collect(Collectors.toList()));
   }
-  
+
   /**
-   *
    * @return a read only list of members found in the UP state
    */
   public List<LocalMember> getLiveMembers() {
     return Collections.unmodifiableList(
-            members.entrySet()
-                    .stream()
-                    .filter(entry -> GossipState.UP.equals(entry.getValue()))
-                    .map(Entry::getKey).collect(Collectors.toList()));
+        members.entrySet().stream()
+            .filter(entry -> GossipState.UP.equals(entry.getValue()))
+            .map(Entry::getKey)
+            .collect(Collectors.toList()));
   }
 
   public LocalMember getMyself() {
@@ -183,17 +220,17 @@ public class GossipManager {
     // protocol manager and transport managers are specified in settings.
     // construct them here via reflection.
 
-    protocolManager = ReflectionUtils.constructWithReflection(
-        settings.getProtocolManagerClass(),
-        new Class<?>[] { GossipSettings.class, String.class, MetricRegistry.class },
-        new Object[] { settings, me.getId(), this.getRegistry() }
-    );
+    protocolManager =
+        ReflectionUtils.constructWithReflection(
+            settings.getProtocolManagerClass(),
+            new Class<?>[] {GossipSettings.class, String.class, MetricRegistry.class},
+            new Object[] {settings, me.getId(), this.getRegistry()});
 
-    transportManager = ReflectionUtils.constructWithReflection(
-        settings.getTransportManagerClass(),
-        new Class<?>[] { GossipManager.class, GossipCore.class},
-        new Object[] { this, gossipCore }
-    );
+    transportManager =
+        ReflectionUtils.constructWithReflection(
+            settings.getTransportManagerClass(),
+            new Class<?>[] {GossipManager.class, GossipCore.class},
+            new Object[] {this, gossipCore});
 
     // start processing gossip messages.
     transportManager.startEndpoint();
@@ -213,10 +250,16 @@ public class GossipManager {
   private void readSavedRingState() {
     if (settings.isPersistRingState()) {
       for (LocalMember l : ringState.readFromDisk()) {
-        LocalMember member = new LocalMember(l.getClusterName(),
-            l.getUri(), l.getId(),
-            clock.nanoTime(), l.getProperties(), settings.getWindowSize(),
-            settings.getMinimumSamples(), settings.getDistribution());
+        LocalMember member =
+            new LocalMember(
+                l.getClusterName(),
+                l.getUri(),
+                l.getId(),
+                clock.nanoTime(),
+                l.getProperties(),
+                settings.getWindowSize(),
+                settings.getMinimumSamples(),
+                settings.getDistribution());
         members.putIfAbsent(member, GossipState.DOWN);
       }
     }
@@ -224,7 +267,8 @@ public class GossipManager {
 
   private void readSavedDataState() {
     if (settings.isPersistDataState()) {
-      for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> l : userDataState.readPerNodeFromDisk().entrySet()) {
+      for (Entry<String, ConcurrentHashMap<String, PerNodeDataMessage>> l :
+          userDataState.readPerNodeFromDisk().entrySet()) {
         for (Entry<String, PerNodeDataMessage> j : l.getValue().entrySet()) {
           gossipCore.addPerNodeData(j.getValue());
         }
@@ -237,9 +281,7 @@ public class GossipManager {
     }
   }
 
-  /**
-   * Shutdown the gossip service.
-   */
+  /** Shutdown the gossip service. */
   public void shutdown() {
     gossipServiceRunning.set(false);
     lockManager.shutdown();
@@ -256,7 +298,7 @@ public class GossipManager {
     scheduledServiced.shutdownNow();
   }
 
-  public void gossipPerNodeData(PerNodeDataMessage message){
+  public void gossipPerNodeData(PerNodeDataMessage message) {
     Objects.nonNull(message.getKey());
     Objects.nonNull(message.getTimestamp());
     Objects.nonNull(message.getPayload());
@@ -264,7 +306,7 @@ public class GossipManager {
     gossipCore.addPerNodeData(message);
   }
 
-  public void gossipSharedData(SharedDataMessage message){
+  public void gossipSharedData(SharedDataMessage message) {
     Objects.nonNull(message.getKey());
     Objects.nonNull(message.getTimestamp());
     Objects.nonNull(message.getPayload());
@@ -273,12 +315,12 @@ public class GossipManager {
   }
 
   @SuppressWarnings("rawtypes")
-  public Crdt findCrdt(String key){
+  public Crdt findCrdt(String key) {
     SharedDataMessage l = gossipCore.getSharedData().get(key);
-    if (l == null){
+    if (l == null) {
       return null;
     }
-    if (l.getExpireAt() < clock.currentTimeMillis()){
+    if (l.getExpireAt() < clock.currentTimeMillis()) {
       return null;
     } else {
       return (Crdt) l.getPayload();
@@ -286,24 +328,24 @@ public class GossipManager {
   }
 
   @SuppressWarnings("rawtypes")
-  public Crdt merge(SharedDataMessage message){
+  public Crdt merge(SharedDataMessage message) {
     Objects.nonNull(message.getKey());
     Objects.nonNull(message.getTimestamp());
     Objects.nonNull(message.getPayload());
     message.setNodeId(me.getId());
-    if (! (message.getPayload() instanceof Crdt)){
+    if (!(message.getPayload() instanceof Crdt)) {
       throw new IllegalArgumentException("Not a subclass of CRDT " + message.getPayload());
     }
     return gossipCore.merge(message);
   }
 
-  public PerNodeDataMessage findPerNodeGossipData(String nodeId, String key){
+  public PerNodeDataMessage findPerNodeGossipData(String nodeId, String key) {
     ConcurrentHashMap<String, PerNodeDataMessage> j = gossipCore.getPerNodeData().get(nodeId);
-    if (j == null){
+    if (j == null) {
       return null;
     } else {
       PerNodeDataMessage l = j.get(key);
-      if (l == null){
+      if (l == null) {
         return null;
       }
       if (l.getExpireAt() != null && l.getExpireAt() < clock.currentTimeMillis()) {
@@ -313,12 +355,12 @@ public class GossipManager {
     }
   }
 
-  public SharedDataMessage findSharedGossipData(String key){
+  public SharedDataMessage findSharedGossipData(String key) {
     SharedDataMessage l = gossipCore.getSharedData().get(key);
-    if (l == null){
+    if (l == null) {
       return null;
     }
-    if (l.getExpireAt() < clock.currentTimeMillis()){
+    if (l.getExpireAt() < clock.currentTimeMillis()) {
       return null;
     } else {
       return l;
@@ -344,34 +386,34 @@ public class GossipManager {
   public Clock getClock() {
     return clock;
   }
-  
+
   // todo: consider making these path methods part of GossipSettings
-  
+
   public MetricRegistry getRegistry() {
     return registry;
   }
-  
+
   public ProtocolManager getProtocolManager() {
     return protocolManager;
   }
-  
+
   public TransportManager getTransportManager() {
     return transportManager;
   }
-  
-  public void registerPerNodeDataSubscriber(UpdateNodeDataEventHandler handler){
+
+  public void registerPerNodeDataSubscriber(UpdateNodeDataEventHandler handler) {
     gossipCore.registerPerNodeDataSubscriber(handler);
   }
-  
-  public void registerSharedDataSubscriber(UpdateSharedDataEventHandler handler){
+
+  public void registerSharedDataSubscriber(UpdateSharedDataEventHandler handler) {
     gossipCore.registerSharedDataSubscriber(handler);
   }
-  
-  public void unregisterPerNodeDataSubscriber(UpdateNodeDataEventHandler handler){
+
+  public void unregisterPerNodeDataSubscriber(UpdateNodeDataEventHandler handler) {
     gossipCore.unregisterPerNodeDataSubscriber(handler);
   }
-  
-  public void unregisterSharedDataSubscriber(UpdateSharedDataEventHandler handler){
+
+  public void unregisterSharedDataSubscriber(UpdateSharedDataEventHandler handler) {
     gossipCore.unregisterSharedDataSubscriber(handler);
   }
 
@@ -381,6 +423,7 @@ public class GossipManager {
 
   /**
    * Get the lock manager specified with this GossipManager.
+   *
    * @return lock manager object.
    */
   public LockManager getLockManager() {
@@ -389,10 +432,11 @@ public class GossipManager {
 
   /**
    * Try to acquire a lock on given shared data key.
+   *
    * @param key key of tha share data object.
    * @throws VoteFailedException if the locking is failed.
    */
-  public void acquireSharedDataLock(String key) throws VoteFailedException{
+  public void acquireSharedDataLock(String key) throws VoteFailedException {
     lockManager.acquireSharedDataLock(key);
   }
 }

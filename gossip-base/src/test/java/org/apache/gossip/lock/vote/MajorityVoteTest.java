@@ -17,12 +17,11 @@
  */
 package org.apache.gossip.lock.vote;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class MajorityVoteTest {
 

@@ -23,6 +23,7 @@ public class UdpNotAMemberFault extends NotAMemberFault implements Trackable {
 
   private String uriFrom;
   private String uuid;
+
   public UdpNotAMemberFault() {}
 
   public String getUriFrom() {

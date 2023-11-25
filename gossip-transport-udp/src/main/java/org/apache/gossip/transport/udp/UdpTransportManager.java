@@ -17,12 +17,6 @@
  */
 package org.apache.gossip.transport.udp;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.gossip.manager.GossipCore;
-import org.apache.gossip.manager.GossipManager;
-import org.apache.gossip.model.Base;
-import org.apache.gossip.transport.AbstractTransportManager;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -32,6 +26,11 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.gossip.manager.GossipCore;
+import org.apache.gossip.manager.GossipManager;
+import org.apache.gossip.model.Base;
+import org.apache.gossip.transport.AbstractTransportManager;
 
 /**
  * This class is constructed by reflection in GossipManager. It manages transport (byte read/write)

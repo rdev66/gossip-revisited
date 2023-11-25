@@ -38,8 +38,7 @@ public class FailureDetector {
   }
 
   /**
-   * Updates the statistics based on the delta between the last
-   * heartbeat and supplied time
+   * Updates the statistics based on the delta between the last heartbeat and supplied time
    *
    * @param now the time of the heartbeat in milliseconds
    */
@@ -63,9 +62,13 @@ public class FailureDetector {
       if (distribution.equals("normal")) {
         double standardDeviation = descriptiveStatistics.getStandardDeviation();
         standardDeviation = Math.max(standardDeviation, 0.1);
-        probability = new NormalDistribution(descriptiveStatistics.getMean(), standardDeviation).cumulativeProbability(delta);
+        probability =
+            new NormalDistribution(descriptiveStatistics.getMean(), standardDeviation)
+                .cumulativeProbability(delta);
       } else {
-        probability = new ExponentialDistribution(descriptiveStatistics.getMean()).cumulativeProbability(delta);
+        probability =
+            new ExponentialDistribution(descriptiveStatistics.getMean())
+                .cumulativeProbability(delta);
       }
       final double eps = 1e-12;
       if (1 - probability < eps) {

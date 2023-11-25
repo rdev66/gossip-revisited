@@ -22,20 +22,17 @@ import org.apache.gossip.manager.GossipManager;
 
 public class StandAloneNode extends StandAloneExampleBase {
 
-  private static boolean WILL_READ = false;
-
   StandAloneNode(String[] args) {
     args = super.checkArgsForClearFlag(args);
     super.initGossipManager(args);
   }
 
-  public static void main(String[] args) throws InterruptedException, IOException {
+  public static void main(String[] args) throws IOException {
     StandAloneNode example = new StandAloneNode(args);
+    boolean WILL_READ = false;
     example.exec(WILL_READ);
   }
 
   @Override
-  void printValues(GossipManager gossipService) {
-  }
-
+  void printValues(GossipManager gossipService) {}
 }

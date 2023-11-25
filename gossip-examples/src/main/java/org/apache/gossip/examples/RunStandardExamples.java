@@ -21,10 +21,6 @@ import java.io.IOException;
 
 public class RunStandardExamples {
 
-  private static boolean WILL_READ = true;
-
-  private static boolean WILL_NOT_READ = false;
-
   public static void main(String[] args) {
     if ((args.length < 1) || args[0].equals("-h") || args[0].equals("--help") || args.length < 2) {
       System.out.print(usage());
@@ -37,16 +33,18 @@ public class RunStandardExamples {
         System.out.print(usage());
         return;
       }
-      runExaple(example, channel);
+      runExample(example, channel);
     } catch (Exception e) {
       System.out.print(usage());
     }
   }
 
-  private static void runExaple(int exampleNumber, int channel) throws IOException {
-    String[] args = stanardArgs(channel, new String[4]);
+  private static void runExample(int exampleNumber, int channel) throws IOException {
+    String[] args = standardArgs(channel, new String[4]);
+    boolean WILL_READ = true;
     if (exampleNumber == 1) {
       StandAloneNode example = new StandAloneNode(args);
+      boolean WILL_NOT_READ = false;
       example.exec(WILL_NOT_READ);
     } else if (exampleNumber == 2) {
       StandAloneNodeCrdtOrSet example = new StandAloneNodeCrdtOrSet(args);
@@ -61,7 +59,7 @@ public class RunStandardExamples {
     }
   }
 
-  private static String[] stanardArgs(int channel, String[] args) {
+  private static String[] standardArgs(int channel, String[] args) {
     // see README.md for examples
     args[0] = "udp://localhost:1000" + channel;
     args[1] = "" + channel;
@@ -71,7 +69,7 @@ public class RunStandardExamples {
   }
 
   private static String[] extendedArgs(int channel, String[] args) {
-    args = stanardArgs(channel, args);
+    standardArgs(channel, args);
     // see README.md for examples
     if (channel == 0) {
       args[4] = "1";

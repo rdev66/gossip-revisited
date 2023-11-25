@@ -19,7 +19,6 @@ package org.apache.gossip;
 
 import java.net.URI;
 import java.util.Map;
-
 import org.apache.gossip.accrual.FailureDetector;
 
 /**

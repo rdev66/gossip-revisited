@@ -18,7 +18,6 @@
 package org.apache.gossip.examples;
 
 import java.io.IOException;
-
 import org.apache.gossip.crdt.PNCounter;
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.model.SharedDataMessage;
@@ -30,7 +29,7 @@ public class StandAlonePNCounter extends StandAloneExampleBase {
     super.initGossipManager(args);
   }
 
-  public static void main(String[] args) throws InterruptedException, IOException {
+  public static void main(String[] args) throws  IOException {
     StandAlonePNCounter example = new StandAlonePNCounter(args);
     boolean willRead = true;
     example.exec(willRead);
@@ -61,7 +60,7 @@ public class StandAlonePNCounter extends StandAloneExampleBase {
     if (valid) {
       if (op == 'i') {
         increment(l, getGossipManager());
-      } else if (op == 'd') {
+      } else {
         decrement(l, getGossipManager());
       }
     }

@@ -17,11 +17,10 @@
  */
 package org.apache.gossip.replication;
 
-import org.apache.gossip.LocalMember;
-import org.apache.gossip.model.Base;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.gossip.LocalMember;
+import org.apache.gossip.model.Base;
 
 /**
  * Replicable implementation which does not replicate data to given set of nodes.

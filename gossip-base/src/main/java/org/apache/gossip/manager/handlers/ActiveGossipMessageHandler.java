@@ -33,7 +33,7 @@ import org.apache.gossip.udp.UdpNotAMemberFault;
 
 @Slf4j
 public class ActiveGossipMessageHandler implements MessageHandler {
-  
+
   /**
    * @param gossipCore context.
    * @param gossipManager context.
@@ -53,7 +53,8 @@ public class ActiveGossipMessageHandler implements MessageHandler {
         log.debug("Gossip message with faulty URI", e);
         continue;
       }
-      RemoteMember member = new RemoteMember(
+      RemoteMember member =
+          new RemoteMember(
               activeGossipMessage.getMembers().get(i).getCluster(),
               u,
               activeGossipMessage.getMembers().get(i).getId(),

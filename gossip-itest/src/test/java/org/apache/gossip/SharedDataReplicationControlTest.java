@@ -44,8 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class SharedDataReplicationControlTest extends AbstractIntegrationBase {
 
   @Test
-  public void sharedDataReplicationTest()
-      throws URISyntaxException {
+  public void sharedDataReplicationTest() throws URISyntaxException {
     generateStandardNodes(3);
 
     // check whether the members are discovered

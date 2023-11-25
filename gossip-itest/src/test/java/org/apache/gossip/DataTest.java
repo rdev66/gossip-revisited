@@ -52,7 +52,8 @@ public class DataTest {
   private final String pnCounterKey = "crdtpn";
 
   @BeforeClass
-  public static void initializeMembers() throws InterruptedException, UnknownHostException, URISyntaxException{
+  public static void initializeMembers()
+      throws InterruptedException, UnknownHostException, URISyntaxException {
     final int clusterMembers = 2;
 
     GossipSettings settings = new GossipSettings();
@@ -60,107 +61,122 @@ public class DataTest {
     settings.setPersistDataState(false);
     String cluster = UUID.randomUUID().toString();
     List<Member> startupMembers = new ArrayList<>();
-    for (int i = 0; i < clusterMembers; ++i){
+    for (int i = 0; i < clusterMembers; ++i) {
       int id = i + 1;
       URI uri = new URI("udp://" + "127.0.0.1" + ":" + (50000 + id));
       startupMembers.add(new RemoteMember(cluster, uri, id + ""));
     }
 
-    for (Member member : startupMembers){
-      GossipManager gossipService = GossipManagerBuilder.newBuilder().cluster(cluster).uri(member.getUri())
-          .id(member.getId()).gossipMembers(startupMembers).gossipSettings(settings).build();
+    for (Member member : startupMembers) {
+      GossipManager gossipService =
+          GossipManagerBuilder.newBuilder()
+              .cluster(cluster)
+              .uri(member.getUri())
+              .id(member.getId())
+              .gossipMembers(startupMembers)
+              .gossipSettings(settings)
+              .build();
       clients.add(gossipService);
       gossipService.init();
     }
   }
 
   @AfterClass
-  public static void shutdownMembers(){
-    for (final GossipManager client : clients){
+  public static void shutdownMembers() {
+    for (final GossipManager client : clients) {
       client.shutdown();
     }
   }
 
   @Test
-  public void simpleDataTest(){
-    TUnit.assertThat(() -> {
-      int total = 0;
-      for (GossipManager client : clients){
-        total += client.getLiveMembers().size();
-      }
-      return total;
-    }).afterWaitingAtMost(10, TimeUnit.SECONDS).isEqualTo(2);
+  public void simpleDataTest() {
+    TUnit.assertThat(
+            () -> {
+              int total = 0;
+              for (GossipManager client : clients) {
+                total += client.getLiveMembers().size();
+              }
+              return total;
+            })
+        .afterWaitingAtMost(10, TimeUnit.SECONDS)
+        .isEqualTo(2);
 
     clients.get(0).gossipPerNodeData(generatePerNodeMsg("a", "b"));
     clients.get(0).gossipSharedData(generateSharedMsg("a", "c"));
 
-    TUnit.assertThat(() -> {
-      PerNodeDataMessage x = clients.get(1).findPerNodeGossipData(1 + "", "a");
-      if (x == null)
-        return "";
-      else
-        return x.getPayload();
-    }).afterWaitingAtMost(10, TimeUnit.SECONDS).isEqualTo("b");
+    TUnit.assertThat(
+            () -> {
+              PerNodeDataMessage x = clients.get(1).findPerNodeGossipData(1 + "", "a");
+              if (x == null) return "";
+              else return x.getPayload();
+            })
+        .afterWaitingAtMost(10, TimeUnit.SECONDS)
+        .isEqualTo("b");
 
-    TUnit.assertThat(() -> {
-      SharedDataMessage x = clients.get(1).findSharedGossipData("a");
-      if (x == null)
-        return "";
-      else
-        return x.getPayload();
-    }).afterWaitingAtMost(10, TimeUnit.SECONDS).isEqualTo("c");
+    TUnit.assertThat(
+            () -> {
+              SharedDataMessage x = clients.get(1).findSharedGossipData("a");
+              if (x == null) return "";
+              else return x.getPayload();
+            })
+        .afterWaitingAtMost(10, TimeUnit.SECONDS)
+        .isEqualTo("c");
   }
 
-  Set<String> setFromList(String... elements){
+  Set<String> setFromList(String... elements) {
     return new HashSet<>(Arrays.asList(elements));
   }
 
-  void crdtSetTest(String key, Function<Set<String>, CrdtAddRemoveSet<String, Set<String>, ?>> construct){
-    //populate
+  void crdtSetTest(
+      String key, Function<Set<String>, CrdtAddRemoveSet<String, Set<String>, ?>> construct) {
+    // populate
     clients.get(0).merge(generateSharedMsg(key, construct.apply(setFromList("1", "2"))));
     clients.get(1).merge(generateSharedMsg(key, construct.apply(setFromList("3", "4"))));
 
     assertMergedCrdt(key, construct.apply(setFromList("1", "2", "3", "4")).value());
 
-    //drop element
+    // drop element
     @SuppressWarnings("unchecked")
-    CrdtAddRemoveSet<String, ?, ?> set = (CrdtAddRemoveSet<String, ?, ?>) clients.get(0).findCrdt(key);
+    CrdtAddRemoveSet<String, ?, ?> set =
+        (CrdtAddRemoveSet<String, ?, ?>) clients.get(0).findCrdt(key);
     clients.get(0).merge(generateSharedMsg(key, set.remove("3")));
 
-    //assert deletion
+    // assert deletion
     assertMergedCrdt(key, construct.apply(setFromList("1", "2", "4")).value());
   }
 
   @Test
-  public void OrSetTest(){
+  public void OrSetTest() {
     crdtSetTest("cror", OrSet::new);
   }
 
   @Test
-  public void LWWSetTest(){
+  public void LWWSetTest() {
     crdtSetTest("crlww", LwwSet::new);
   }
 
   @Test
-  public void MaxChangeSetTest(){
+  public void MaxChangeSetTest() {
     crdtSetTest("crmcs", MaxChangeSet::new);
   }
 
   @Test
-  public void TwoPhaseSetTest(){
+  public void TwoPhaseSetTest() {
     crdtSetTest("crtps", TwoPhaseSet::new);
   }
 
   @Test
-  public void GrowOnlyCounterTest(){
-    Consumer<Long> assertCountUpdated = count -> {
-      for (GossipManager client : clients){
-        TUnit.assertThat(() -> client.findCrdt(gCounterKey))
-            .afterWaitingAtMost(10, TimeUnit.SECONDS)
-            .isEqualTo(new GrowOnlyCounter(new GrowOnlyCounter.Builder(client).increment(count)));
-      }
-    };
-    //generate different increment
+  public void GrowOnlyCounterTest() {
+    Consumer<Long> assertCountUpdated =
+        count -> {
+          for (GossipManager client : clients) {
+            TUnit.assertThat(() -> client.findCrdt(gCounterKey))
+                .afterWaitingAtMost(10, TimeUnit.SECONDS)
+                .isEqualTo(
+                    new GrowOnlyCounter(new GrowOnlyCounter.Builder(client).increment(count)));
+          }
+        };
+    // generate different increment
     Object payload = new GrowOnlyCounter(new GrowOnlyCounter.Builder(clients.get(0)).increment(1L));
     clients.get(0).merge(generateSharedMsg(gCounterKey, payload));
     payload = new GrowOnlyCounter(new GrowOnlyCounter.Builder(clients.get(1)).increment(2L));
@@ -168,30 +184,39 @@ public class DataTest {
 
     assertCountUpdated.accept((long) 3);
 
-    //update one
+    // update one
     GrowOnlyCounter gc = (GrowOnlyCounter) clients.get(1).findCrdt(gCounterKey);
-    GrowOnlyCounter gc2 = new GrowOnlyCounter(gc,
-        new GrowOnlyCounter.Builder(clients.get(1)).increment(4L));
+    GrowOnlyCounter gc2 =
+        new GrowOnlyCounter(gc, new GrowOnlyCounter.Builder(clients.get(1)).increment(4L));
     clients.get(1).merge(generateSharedMsg(gCounterKey, gc2));
 
     assertCountUpdated.accept((long) 7);
   }
 
   @Test
-  public void PNCounterTest(){
-    Consumer<List<Integer>> counterUpdate = list -> {
-      int clientIndex = 0;
-      for (int delta : list){
-        PNCounter c = (PNCounter) clients.get(clientIndex).findCrdt(pnCounterKey);
-        c = new PNCounter(c, new PNCounter.Builder(clients.get(clientIndex)).increment(((long) delta)));
-        clients.get(clientIndex).merge(generateSharedMsg(pnCounterKey, c));
-        clientIndex = (clientIndex + 1) % clients.size();
-      }
-    };
+  public void PNCounterTest() {
+    Consumer<List<Integer>> counterUpdate =
+        list -> {
+          int clientIndex = 0;
+          for (int delta : list) {
+            PNCounter c = (PNCounter) clients.get(clientIndex).findCrdt(pnCounterKey);
+            c =
+                new PNCounter(
+                    c, new PNCounter.Builder(clients.get(clientIndex)).increment(((long) delta)));
+            clients.get(clientIndex).merge(generateSharedMsg(pnCounterKey, c));
+            clientIndex = (clientIndex + 1) % clients.size();
+          }
+        };
 
     // given PNCounter
-    clients.get(0).merge(generateSharedMsg(pnCounterKey, new PNCounter(new PNCounter.Builder(clients.get(0)))));
-    clients.get(1).merge(generateSharedMsg(pnCounterKey, new PNCounter(new PNCounter.Builder(clients.get(1)))));
+    clients
+        .get(0)
+        .merge(
+            generateSharedMsg(pnCounterKey, new PNCounter(new PNCounter.Builder(clients.get(0)))));
+    clients
+        .get(1)
+        .merge(
+            generateSharedMsg(pnCounterKey, new PNCounter(new PNCounter.Builder(clients.get(1)))));
 
     assertMergedCrdt(pnCounterKey, (long) 0);
 
@@ -203,28 +228,29 @@ public class DataTest {
 
     Long[] expectedResults = {5L, 7L, 9L, 3L};
 
-    for (int i = 0; i < updateLists.size(); i++){
+    for (int i = 0; i < updateLists.size(); i++) {
       counterUpdate.accept(updateLists.get(i));
       assertMergedCrdt(pnCounterKey, expectedResults[i]);
     }
   }
 
   @Test
-  public void GrowOnlySetTest(){
+  public void GrowOnlySetTest() {
     clients.get(0).merge(generateSharedMsg("cr", new GrowOnlySet<>(Arrays.asList("1"))));
     clients.get(1).merge(generateSharedMsg("cr", new GrowOnlySet<>(Arrays.asList("2"))));
 
     assertMergedCrdt("cr", new GrowOnlySet<>(Arrays.asList("1", "2")).value());
   }
 
-  private void assertMergedCrdt(String key, Object expected){
-    for (GossipManager client : clients){
+  private void assertMergedCrdt(String key, Object expected) {
+    for (GossipManager client : clients) {
       TUnit.assertThat(() -> client.findCrdt(key).value())
-          .afterWaitingAtMost(10, TimeUnit.SECONDS).isEqualTo(expected);
+          .afterWaitingAtMost(10, TimeUnit.SECONDS)
+          .isEqualTo(expected);
     }
   }
 
-  private PerNodeDataMessage generatePerNodeMsg(String key, Object payload){
+  private PerNodeDataMessage generatePerNodeMsg(String key, Object payload) {
     PerNodeDataMessage g = new PerNodeDataMessage();
     g.setExpireAt(Long.MAX_VALUE);
     g.setKey(key);
@@ -233,7 +259,7 @@ public class DataTest {
     return g;
   }
 
-  private SharedDataMessage generateSharedMsg(String key, Object payload){
+  private SharedDataMessage generateSharedMsg(String key, Object payload) {
     SharedDataMessage d = new SharedDataMessage();
     d.setKey(key);
     d.setPayload(payload);

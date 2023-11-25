@@ -18,15 +18,13 @@
 package org.apache.gossip.manager;
 
 import com.codahale.metrics.MetricRegistry;
+import io.teknek.tunit.TUnit;
 import java.net.URI;
-
 import org.apache.gossip.GossipSettings;
 import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.model.SharedDataMessage;
 import org.junit.Assert;
 import org.junit.Test;
-
-import io.teknek.tunit.TUnit;
 
 public class DataReaperTest {
 

@@ -17,15 +17,13 @@
  */
 package org.apache.gossip.protocol.json;
 
-import lombok.Data;
-import lombok.Getter;
-import org.apache.gossip.model.Base;
-import org.apache.gossip.udp.Trackable;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import lombok.Data;
+import org.apache.gossip.model.Base;
+import org.apache.gossip.udp.Trackable;
 
 /*
  * Here is a test class for serialization. I've tried to include a lot of things in it including nested classes.

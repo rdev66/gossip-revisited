@@ -29,9 +29,9 @@ import org.apache.gossip.model.Base;
  * @see Replicable
  */
 public class WhiteListReplicable<T extends Base> implements Replicable<T> {
-  
+
   private final List<LocalMember> whiteListMembers;
-  
+
   public WhiteListReplicable(List<LocalMember> whiteListMembers) {
     if (whiteListMembers == null) {
       this.whiteListMembers = new ArrayList<>();

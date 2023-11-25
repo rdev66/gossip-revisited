@@ -27,9 +27,7 @@ import org.apache.gossip.manager.GossipCore;
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.utils.ReflectionUtils;
 
-/**
- * Manage the protcol threads (active and passive gossipers).
- */
+/** Manage the protcol threads (active and passive gossipers). */
 @Slf4j
 public abstract class AbstractTransportManager implements TransportManager {
 
@@ -37,19 +35,16 @@ public abstract class AbstractTransportManager implements TransportManager {
   protected final GossipCore gossipCore;
   private final ExecutorService gossipThreadExecutor;
   private final AbstractActiveGossiper activeGossipThread;
-  
+
   public AbstractTransportManager(GossipManager gossipManager, GossipCore gossipCore) {
     this.gossipManager = gossipManager;
     this.gossipCore = gossipCore;
     gossipThreadExecutor = Executors.newCachedThreadPool();
-    activeGossipThread = ReflectionUtils.constructWithReflection(
-      gossipManager.getSettings().getActiveGossipClass(),
-        new Class<?>[]{
-            GossipManager.class, GossipCore.class, MetricRegistry.class
-        },
-        new Object[]{
-            gossipManager, gossipCore, gossipManager.getRegistry()
-        });
+    activeGossipThread =
+        ReflectionUtils.constructWithReflection(
+            gossipManager.getSettings().getActiveGossipClass(),
+            new Class<?>[] {GossipManager.class, GossipCore.class, MetricRegistry.class},
+            new Object[] {gossipManager, gossipCore, gossipManager.getRegistry()});
   }
 
   // shut down threads etc.

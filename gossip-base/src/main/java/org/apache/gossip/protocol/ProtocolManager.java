@@ -23,7 +23,9 @@ import org.apache.gossip.model.Base;
 /** interface for managing message marshaling. */
 public interface ProtocolManager {
 
-  /** serialize a message
+  /**
+   * serialize a message
+   *
    * @param message
    * @return serialized message.
    * @throws IOException
@@ -32,6 +34,7 @@ public interface ProtocolManager {
 
   /**
    * Reads the next message from a byte source.
+   *
    * @param buf
    * @return a gossip message.
    * @throws IOException

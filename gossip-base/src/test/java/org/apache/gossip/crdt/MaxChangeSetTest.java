@@ -25,16 +25,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MaxChangeSetTest extends AddRemoveStringSetTest<MaxChangeSet<String>> {
-  MaxChangeSet<String> construct(Set<String> set){
+  MaxChangeSet<String> construct(Set<String> set) {
     return new MaxChangeSet<>(set);
   }
 
-  MaxChangeSet<String> construct(){
+  MaxChangeSet<String> construct() {
     return new MaxChangeSet<>();
   }
 
   @Test
-  public void valueTest(){
+  public void valueTest() {
     Map<Character, Integer> struct = new HashMap<>();
     struct.put('a', 0);
     struct.put('b', 1);
@@ -47,7 +47,7 @@ public class MaxChangeSetTest extends AddRemoveStringSetTest<MaxChangeSet<String
   }
 
   @Test
-  public void mergeTest(){
+  public void mergeTest() {
     MaxChangeSet<Integer> set1 = new MaxChangeSet<Integer>().add(1); // Set with one operation on 1
     MaxChangeSet<Integer> set2 = new MaxChangeSet<Integer>().add(1).remove(1); // two operations
     Assert.assertEquals(set1.merge(set2), new MaxChangeSet<Integer>()); // empty set wins

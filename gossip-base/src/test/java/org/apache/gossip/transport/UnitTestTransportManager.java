@@ -18,15 +18,14 @@
 
 package org.apache.gossip.transport;
 
-import org.apache.gossip.manager.GossipCore;
-import org.apache.gossip.manager.GossipManager;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.gossip.manager.GossipCore;
+import org.apache.gossip.manager.GossipManager;
 
 /** Only use in unit tests! */
 public class UnitTestTransportManager extends AbstractTransportManager {

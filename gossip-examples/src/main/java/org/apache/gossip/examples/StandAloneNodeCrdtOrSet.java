@@ -18,7 +18,6 @@
 package org.apache.gossip.examples;
 
 import java.io.IOException;
-
 import org.apache.gossip.crdt.GrowOnlyCounter;
 import org.apache.gossip.crdt.OrSet;
 import org.apache.gossip.manager.GossipManager;
@@ -35,7 +34,7 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
     super.initGossipManager(args);
   }
 
-  public static void main(String[] args) throws InterruptedException, IOException {
+  public static void main(String[] args) throws IOException {
     StandAloneNodeCrdtOrSet example = new StandAloneNodeCrdtOrSet(args);
     boolean willRead = true;
     example.exec(willRead);
@@ -53,7 +52,7 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
 
   private static void gcount(String val, GossipManager gossipManager) {
     GrowOnlyCounter c = (GrowOnlyCounter) gossipManager.findCrdt(INDEX_KEY_FOR_COUNTER);
-    Long l = Long.valueOf(val);
+    long l = Long.parseLong(val);
     if (c == null) {
       c = new GrowOnlyCounter(new GrowOnlyCounter.Builder(gossipManager).increment((l)));
     } else {
@@ -73,7 +72,7 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
     SharedDataMessage m = new SharedDataMessage();
     m.setExpireAt(Long.MAX_VALUE);
     m.setKey(INDEX_KEY_FOR_SET);
-    m.setPayload(new OrSet<String>(s, new OrSet.Builder<String>().remove(val)));
+    m.setPayload(new OrSet<>(s, new OrSet.Builder<String>().remove(val)));
     m.setTimestamp(System.currentTimeMillis());
     gossipService.merge(m);
   }
@@ -82,7 +81,7 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
     SharedDataMessage m = new SharedDataMessage();
     m.setExpireAt(Long.MAX_VALUE);
     m.setKey(INDEX_KEY_FOR_SET);
-    m.setPayload(new OrSet<String>(val));
+    m.setPayload(new OrSet<>(val));
     m.setTimestamp(System.currentTimeMillis());
     gossipService.merge(m);
   }
@@ -118,7 +117,7 @@ public class StandAloneNodeCrdtOrSet extends StandAloneExampleBase {
         valid = false;
       }
     } else if (op == 'l') {
-      if ((val == INDEX_KEY_FOR_SET) || (val == INDEX_KEY_FOR_COUNTER)) {
+      if ((val.equals(INDEX_KEY_FOR_SET)) || (val.equals(INDEX_KEY_FOR_COUNTER))) {
         listen(val, getGossipManager());
       } else {
         valid = false;

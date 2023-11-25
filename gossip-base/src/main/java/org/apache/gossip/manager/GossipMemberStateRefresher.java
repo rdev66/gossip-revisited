@@ -43,17 +43,20 @@ public class GossipMemberStateRefresher {
   private final ScheduledExecutorService scheduledExecutor;
   private final BlockingQueue<Runnable> workQueue;
 
-  public GossipMemberStateRefresher(Map<LocalMember, GossipState> members, GossipSettings settings,
-                                    GossipListener listener,
-                                    BiFunction<String, String, PerNodeDataMessage> findPerNodeGossipData) {
+  public GossipMemberStateRefresher(
+      Map<LocalMember, GossipState> members,
+      GossipSettings settings,
+      GossipListener listener,
+      BiFunction<String, String, PerNodeDataMessage> findPerNodeGossipData) {
     this.members = members;
     this.settings = settings;
     listeners.add(listener);
     this.findPerNodeGossipData = findPerNodeGossipData;
     clock = new SystemClock();
     workQueue = new ArrayBlockingQueue<>(1024);
-    listenerExecutor = new ThreadPoolExecutor(1, 20, 1, TimeUnit.SECONDS, workQueue,
-            new ThreadPoolExecutor.DiscardOldestPolicy());
+    listenerExecutor =
+        new ThreadPoolExecutor(
+            1, 20, 1, TimeUnit.SECONDS, workQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
     scheduledExecutor = Executors.newScheduledThreadPool(1);
   }
 
@@ -72,8 +75,7 @@ public class GossipMemberStateRefresher {
   public void runOnce() {
     for (Entry<LocalMember, GossipState> entry : members.entrySet()) {
       boolean userDown = processOptimisticShutdown(entry);
-      if (userDown)
-        continue;
+      if (userDown) continue;
 
       Double phiMeasure = entry.getKey().detect(clock.nanoTime());
       GossipState requiredState;
@@ -87,17 +89,15 @@ public class GossipMemberStateRefresher {
       if (entry.getValue() != requiredState) {
         members.put(entry.getKey(), requiredState);
         /* Call listeners asynchronously */
-        for (GossipListener listener: listeners)
+        for (GossipListener listener : listeners)
           listenerExecutor.execute(() -> listener.gossipEvent(entry.getKey(), requiredState));
       }
     }
   }
 
   public GossipState calcRequiredState(Double phiMeasure) {
-    if (phiMeasure > settings.getConvictThreshold())
-      return GossipState.DOWN;
-    else
-      return GossipState.UP;
+    if (phiMeasure > settings.getConvictThreshold()) return GossipState.DOWN;
+    else return GossipState.UP;
   }
 
   public GossipState calcRequiredStateCleanupInterval(LocalMember member, GossipState state) {
@@ -111,14 +111,15 @@ public class GossipMemberStateRefresher {
   }
 
   /**
-   * If we have a special key the per-node data that means that the node has sent us
-   * a pre-emptive shutdown message. We process this so node is seen down sooner
+   * If we have a special key the per-node data that means that the node has sent us a pre-emptive
+   * shutdown message. We process this so node is seen down sooner
    *
    * @param l member to consider
    * @return true if node forced down
    */
   public boolean processOptimisticShutdown(Entry<LocalMember, GossipState> l) {
-    PerNodeDataMessage m = findPerNodeGossipData.apply(l.getKey().getId(), ShutdownMessage.PER_NODE_KEY);
+    PerNodeDataMessage m =
+        findPerNodeGossipData.apply(l.getKey().getId(), ShutdownMessage.PER_NODE_KEY);
     if (m == null) {
       return false;
     }
@@ -126,7 +127,7 @@ public class GossipMemberStateRefresher {
     if (s.getShutdownAtNanos() > l.getKey().getHeartbeat()) {
       members.put(l.getKey(), GossipState.DOWN);
       if (l.getValue() == GossipState.UP) {
-        for (GossipListener listener: listeners)
+        for (GossipListener listener : listeners)
           listenerExecutor.execute(() -> listener.gossipEvent(l.getKey(), GossipState.DOWN));
       }
       return true;

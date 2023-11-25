@@ -27,16 +27,18 @@ public class MemberTest {
 
   @Test
   public void testHashCodeFromGossip40() throws URISyntaxException {
-    Assertions.assertNotEquals(new LocalMember(
-            "mycluster",
-            new URI("udp://4.4.4.4:1000"),
-            "myid",
-            1,
-            new HashMap<>(),
-            10,
-            5,
-            "exponential")
-        .hashCode(), new LocalMember(
+    Assertions.assertNotEquals(
+        new LocalMember(
+                "mycluster",
+                new URI("udp://4.4.4.4:1000"),
+                "myid",
+                1,
+                new HashMap<>(),
+                10,
+                5,
+                "exponential")
+            .hashCode(),
+        new LocalMember(
                 "mycluster",
                 new URI("udp://4.4.4.5:1005"),
                 "yourid",

@@ -17,15 +17,14 @@
  */
 package org.apache.gossip.crdt;
 
-import org.apache.gossip.manager.Clock;
-import org.apache.gossip.manager.SystemClock;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.gossip.manager.Clock;
+import org.apache.gossip.manager.SystemClock;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LwwSetTest extends AddRemoveStringSetTest<LwwSet<String>> {
   private static Clock clock = new SystemClock();

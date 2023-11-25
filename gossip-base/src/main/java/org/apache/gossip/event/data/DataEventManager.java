@@ -19,7 +19,6 @@ package org.apache.gossip.event.data;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
-
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

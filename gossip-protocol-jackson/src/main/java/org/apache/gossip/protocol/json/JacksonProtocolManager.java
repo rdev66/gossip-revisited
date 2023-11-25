@@ -21,13 +21,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.gossip.GossipSettings;
-import org.apache.gossip.crdt.CrdtModule;
-import org.apache.gossip.manager.PassiveGossipConstants;
-import org.apache.gossip.model.Base;
-import org.apache.gossip.model.SignedPayload;
-import org.apache.gossip.protocol.ProtocolManager;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,6 +33,12 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import org.apache.gossip.GossipSettings;
+import org.apache.gossip.crdt.CrdtModule;
+import org.apache.gossip.manager.PassiveGossipConstants;
+import org.apache.gossip.model.Base;
+import org.apache.gossip.model.SignedPayload;
+import org.apache.gossip.protocol.ProtocolManager;
 
 // this class is constructed by reflection in GossipManager.
 public class JacksonProtocolManager implements ProtocolManager {

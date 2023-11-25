@@ -38,8 +38,7 @@ public class ShutdownDeadtimeTest {
   // harm), and the
   //       sleep that happens after startup.
   @Test
-  public void DeadNodesDoNotComeAliveAgain()
-      throws InterruptedException, URISyntaxException {
+  public void DeadNodesDoNotComeAliveAgain() throws InterruptedException, URISyntaxException {
     GossipSettings settings = new GossipSettings(100, 10000, 1000, 1, 10.0, "normal", false);
     settings.setPersistRingState(false);
     settings.setPersistDataState(false);
@@ -68,13 +67,13 @@ public class ShutdownDeadtimeTest {
       Thread.sleep(1000);
     }
     TUnit.assertThat(
-                    () -> {
-                      int total = 0;
-                      for (int i = 0; i < clusterMembers; ++i) {
-                        total += clients.get(i).getLiveMembers().size();
-                      }
-                      return total;
-                    })
+            () -> {
+              int total = 0;
+              for (int i = 0; i < clusterMembers; ++i) {
+                total += clients.get(i).getLiveMembers().size();
+              }
+              return total;
+            })
         .afterWaitingAtMost(40, TimeUnit.SECONDS)
         .isEqualTo(20);
 
@@ -86,25 +85,25 @@ public class ShutdownDeadtimeTest {
     final String shutdownId = clients.get(randomClientId).getMyself().getId();
     clients.get(randomClientId).shutdown();
     TUnit.assertThat(
-                    () -> {
-                      int total = 0;
-                      for (int i = 0; i < clusterMembers; ++i) {
-                        total += clients.get(i).getLiveMembers().size();
-                      }
-                      return total;
-                    })
+            () -> {
+              int total = 0;
+              for (int i = 0; i < clusterMembers; ++i) {
+                total += clients.get(i).getLiveMembers().size();
+              }
+              return total;
+            })
         .afterWaitingAtMost(40, TimeUnit.SECONDS)
         .isEqualTo(16);
     clients.remove(randomClientId);
 
     TUnit.assertThat(
-                    () -> {
-                      int total = 0;
-                      for (int i = 0; i < clusterMembers - 1; ++i) {
-                        total += clients.get(i).getDeadMembers().size();
-                      }
-                      return total;
-                    })
+            () -> {
+              int total = 0;
+              for (int i = 0; i < clusterMembers - 1; ++i) {
+                total += clients.get(i).getDeadMembers().size();
+              }
+              return total;
+            })
         .afterWaitingAtMost(50, TimeUnit.SECONDS)
         .isEqualTo(4);
 
@@ -123,13 +122,13 @@ public class ShutdownDeadtimeTest {
 
     // verify that the client is alive again for every node
     TUnit.assertThat(
-                    () -> {
-                      int total = 0;
-                      for (int i = 0; i < clusterMembers; ++i) {
-                        total += clients.get(i).getLiveMembers().size();
-                      }
-                      return total;
-                    })
+            () -> {
+              int total = 0;
+              for (int i = 0; i < clusterMembers; ++i) {
+                total += clients.get(i).getLiveMembers().size();
+              }
+              return total;
+            })
         .afterWaitingAtMost(60, TimeUnit.SECONDS)
         .isEqualTo(20);
 

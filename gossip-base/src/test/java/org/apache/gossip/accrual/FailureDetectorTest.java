@@ -54,20 +54,24 @@ public class FailureDetectorTest {
     }
     Integer lastRecorded = values.get(values.size() - 2);
 
-    //after "step" delay we need to be considered UP
+    // after "step" delay we need to be considered UP
     Assertions.assertTrue(fd.computePhiMeasure(values.get(values.size() - 1)) < failureThreshold);
 
-    //if we check phi-measure after mean delay we get value for 0.5 probability(normal distribution)
-    Assertions.assertEquals(fd.computePhiMeasure(lastRecorded + Math.round(deltaSum / deltaCount)),
-            -Math.log10(0.5),
-            0.1);
+    // if we check phi-measure after mean delay we get value for 0.5 probability(normal
+    // distribution)
+    Assertions.assertEquals(
+        fd.computePhiMeasure(lastRecorded + Math.round(deltaSum / deltaCount)),
+        -Math.log10(0.5),
+        0.1);
   }
 
   @Test
   public void checkMinimumSamples() {
     int minimumSamples = 5;
     FailureDetector fd = new FailureDetector(minimumSamples, 1000, "normal");
-    for (int i = 0; i < minimumSamples + 1; i++) { // +1 because we don't place first heartbeat into structure
+    for (int i = 0;
+        i < minimumSamples + 1;
+        i++) { // +1 because we don't place first heartbeat into structure
       Assertions.assertNull(fd.computePhiMeasure(100));
       fd.recordHeartbeat(i);
     }
@@ -77,28 +81,30 @@ public class FailureDetectorTest {
   @Test
   public void checkMonotonicDead() {
     final FailureDetector fd = new FailureDetector(5, 1000, "normal");
-    TriConsumer<Integer, Integer, Integer> checkAlive = (begin, end, step) -> {
-      List<Integer> times = generateTimeList(begin, end, step);
-        for (Integer time : times) {
+    TriConsumer<Integer, Integer, Integer> checkAlive =
+        (begin, end, step) -> {
+          List<Integer> times = generateTimeList(begin, end, step);
+          for (Integer time : times) {
             Double current = fd.computePhiMeasure(time);
             if (current != null) {
-                Assertions.assertTrue(current < failureThreshold);
+              Assertions.assertTrue(current < failureThreshold);
             }
             fd.recordHeartbeat(time);
-        }
-    };
+          }
+        };
 
-    TriConsumer<Integer, Integer, Integer> checkDeadMonotonic = (begin, end, step) -> {
-      List<Integer> times = generateTimeList(begin, end, step);
-      Double prev = null;
-        for (Integer time : times) {
+    TriConsumer<Integer, Integer, Integer> checkDeadMonotonic =
+        (begin, end, step) -> {
+          List<Integer> times = generateTimeList(begin, end, step);
+          Double prev = null;
+          for (Integer time : times) {
             Double current = fd.computePhiMeasure(time);
             if (current != null && prev != null) {
-                Assertions.assertTrue(current >= prev);
+              Assertions.assertTrue(current >= prev);
             }
             prev = current;
-        }
-    };
+          }
+        };
 
     checkAlive.accept(0, 20000, 100);
     checkDeadMonotonic.accept(20000, 20500, 5);

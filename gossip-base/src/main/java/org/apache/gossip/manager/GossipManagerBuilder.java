@@ -18,19 +18,17 @@
 package org.apache.gossip.manager;
 
 import com.codahale.metrics.MetricRegistry;
-import org.apache.gossip.GossipSettings;
-import org.apache.gossip.Member;
-import org.apache.gossip.StartupSettings;
-import org.apache.gossip.event.GossipListener;
-import org.apache.gossip.event.GossipState;
-import org.apache.gossip.manager.handlers.MessageHandler;
-import org.apache.gossip.manager.handlers.MessageHandlerFactory;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.gossip.GossipSettings;
+import org.apache.gossip.Member;
+import org.apache.gossip.StartupSettings;
+import org.apache.gossip.event.GossipListener;
+import org.apache.gossip.manager.handlers.MessageHandler;
+import org.apache.gossip.manager.handlers.MessageHandlerFactory;
 
 public class GossipManagerBuilder {
 

@@ -23,7 +23,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.gossip.GossipSettings;
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.RemoteMember;

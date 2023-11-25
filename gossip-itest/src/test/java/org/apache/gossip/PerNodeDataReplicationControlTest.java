@@ -18,18 +18,17 @@
 package org.apache.gossip;
 
 import io.teknek.tunit.TUnit;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import org.apache.gossip.manager.DatacenterRackAwareActiveGossiper;
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.manager.GossipManagerBuilder;
 import org.apache.gossip.model.PerNodeDataMessage;
 import org.apache.gossip.replication.*;
 import org.junit.Test;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class PerNodeDataReplicationControlTest extends AbstractIntegrationBase {
 

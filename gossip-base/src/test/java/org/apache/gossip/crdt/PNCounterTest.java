@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.gossip.LocalMember;
 import org.apache.gossip.manager.GossipManager;
 import org.junit.Assert;

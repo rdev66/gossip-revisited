@@ -18,12 +18,11 @@
 package org.apache.gossip.event.data;
 
 import com.codahale.metrics.MetricRegistry;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 public class DataEventManagerTest {
 

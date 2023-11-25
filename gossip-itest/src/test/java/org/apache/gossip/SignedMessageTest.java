@@ -17,6 +17,7 @@
  */
 package org.apache.gossip;
 
+import io.teknek.tunit.TUnit;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -28,15 +29,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.gossip.manager.GossipManager;
 import org.apache.gossip.manager.GossipManagerBuilder;
 import org.apache.gossip.manager.PassiveGossipConstants;
 import org.apache.gossip.secure.KeyTool;
 import org.junit.Assert;
 import org.junit.Test;
-
-import io.teknek.tunit.TUnit;
 
 public class SignedMessageTest extends AbstractIntegrationBase {
 

@@ -19,7 +19,6 @@ package org.apache.gossip.crdt;
 
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.junit.Assert;
 import org.junit.Test;
 

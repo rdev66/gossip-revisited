@@ -74,8 +74,7 @@ public class PNCounter implements CrdtCounter<Long, PNCounter> {
 
   @Override
   public boolean equals(Object obj) {
-    if (getClass() != obj.getClass())
-      return false;
+    if (getClass() != obj.getClass()) return false;
     PNCounter other = (PNCounter) obj;
     return value().longValue() == other.value().longValue();
   }
@@ -118,8 +117,8 @@ public class PNCounter implements CrdtCounter<Long, PNCounter> {
     }
 
     public org.apache.gossip.crdt.GrowOnlyCounter.Builder makeGrowOnlyCounterBuilder(long value) {
-      org.apache.gossip.crdt.GrowOnlyCounter.Builder ret = new org.apache.gossip.crdt.GrowOnlyCounter.Builder(
-              myManager);
+      org.apache.gossip.crdt.GrowOnlyCounter.Builder ret =
+          new org.apache.gossip.crdt.GrowOnlyCounter.Builder(myManager);
       ret.increment(value);
       return ret;
     }
@@ -134,5 +133,4 @@ public class PNCounter implements CrdtCounter<Long, PNCounter> {
       return this;
     }
   }
-
 }

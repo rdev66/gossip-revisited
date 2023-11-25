@@ -25,9 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.gossip.crdt.Crdt;
 
-/**
- * CRDT which used for distribute a votes for a given key.
- */
+/** CRDT which used for distribute a votes for a given key. */
 public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVote> {
 
   private final Map<String, VoteCandidate> voteCandidates = new ConcurrentHashMap<>();
@@ -53,11 +51,13 @@ public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVo
     }
     // Merge votes for the same candidate
     for (String sameCandidateId : sameCandidatesSet) {
-      if (this.voteCandidates.containsKey(sameCandidateId) && other.voteCandidates
-              .containsKey(sameCandidateId)) {
-        mergedCandidates.put(sameCandidateId,
-                mergeCandidate(this.voteCandidates.get(sameCandidateId),
-                        other.voteCandidates.get(sameCandidateId)));
+      if (this.voteCandidates.containsKey(sameCandidateId)
+          && other.voteCandidates.containsKey(sameCandidateId)) {
+        mergedCandidates.put(
+            sameCandidateId,
+            mergeCandidate(
+                this.voteCandidates.get(sameCandidateId),
+                other.voteCandidates.get(sameCandidateId)));
       }
     }
 
@@ -65,10 +65,13 @@ public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVo
   }
 
   // Merge different votes for same candidate
-  private VoteCandidate mergeCandidate(VoteCandidate firstCandidate,
-          VoteCandidate secondCandidate) {
-    VoteCandidate mergeResult = new VoteCandidate(firstCandidate.getCandidateNodeId(),
-            firstCandidate.getVotingKey(), new ConcurrentHashMap<>());
+  private VoteCandidate mergeCandidate(
+      VoteCandidate firstCandidate, VoteCandidate secondCandidate) {
+    VoteCandidate mergeResult =
+        new VoteCandidate(
+            firstCandidate.getCandidateNodeId(),
+            firstCandidate.getVotingKey(),
+            new ConcurrentHashMap<>());
     Set<String> firstKeySet = firstCandidate.getVotes().keySet();
     Set<String> secondKeySet = secondCandidate.getVotes().keySet();
     Set<String> sameVoteNodeSet = getIntersection(firstKeySet, secondKeySet);
@@ -76,20 +79,26 @@ public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVo
     // Merge different voters by combining their votes
     for (String differentCandidateId : differentVoteNodeSet) {
       if (firstCandidate.getVotes().containsKey(differentCandidateId)) {
-        mergeResult.getVotes()
-                .put(differentCandidateId, firstCandidate.getVotes().get(differentCandidateId));
+        mergeResult
+            .getVotes()
+            .put(differentCandidateId, firstCandidate.getVotes().get(differentCandidateId));
       } else if (secondCandidate.getVotes().containsKey(differentCandidateId)) {
-        mergeResult.getVotes()
-                .put(differentCandidateId, secondCandidate.getVotes().get(differentCandidateId));
+        mergeResult
+            .getVotes()
+            .put(differentCandidateId, secondCandidate.getVotes().get(differentCandidateId));
       }
     }
     // Merge vote for same voter
     for (String sameVoteNodeId : sameVoteNodeSet) {
-      if (firstCandidate.getVotes().containsKey(sameVoteNodeId) && secondCandidate.getVotes()
-              .containsKey(sameVoteNodeId)) {
-        mergeResult.getVotes().put(sameVoteNodeId,
-                mergeVote(firstCandidate.getVotes().get(sameVoteNodeId),
-                        secondCandidate.getVotes().get(sameVoteNodeId)));
+      if (firstCandidate.getVotes().containsKey(sameVoteNodeId)
+          && secondCandidate.getVotes().containsKey(sameVoteNodeId)) {
+        mergeResult
+            .getVotes()
+            .put(
+                sameVoteNodeId,
+                mergeVote(
+                    firstCandidate.getVotes().get(sameVoteNodeId),
+                    secondCandidate.getVotes().get(sameVoteNodeId)));
       }
     }
 
@@ -131,7 +140,6 @@ public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVo
     Map<String, VoteCandidate> copy = new ConcurrentHashMap<>();
     copy.putAll(voteCandidates);
     return Collections.unmodifiableMap(copy);
-
   }
 
   @Override
@@ -141,12 +149,9 @@ public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVo
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (!(obj instanceof MajorityVote))
-      return false;
+    if (obj == null) return false;
+    if (obj == this) return true;
+    if (!(obj instanceof MajorityVote)) return false;
     MajorityVote other = (MajorityVote) obj;
     return Objects.equals(voteCandidates, other.voteCandidates);
   }
@@ -164,5 +169,4 @@ public class MajorityVote implements Crdt<Map<String, VoteCandidate>, MajorityVo
   public Map<String, VoteCandidate> getVoteCandidates() {
     return new ConcurrentHashMap<>(voteCandidates);
   }
-
 }
